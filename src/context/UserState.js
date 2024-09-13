@@ -27,7 +27,6 @@ const UserState = (props) => {
             body: JSON.stringify({ name, lastname, email, contact_number, role_id }),
           });
           const json = await response.json();
-          // console.log(json);
           setNotes(users.concat(json));
       }
     //   const deleteNote = async (id) =>{
