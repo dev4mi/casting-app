@@ -23,6 +23,8 @@ const ExSwitch = lazy(() => import("../views/FormElements/ExSwitch.js"));
 // form layouts
 const FormLayouts = lazy(() => import("../views/FormLayouts/FormLayouts.js"));
 const UserLayouts = lazy(() => import("../views/Users/User.js"));
+const MoldLayouts = lazy(() => import("../views/Molding/MoldingView.js"));
+const ProductPartsLayouts = lazy(() => import("../views/ProductParts/ProductPartsView.js"));
 
 /*****Routes******/
 
@@ -42,6 +44,8 @@ const ThemeRoutes = [
       { path: "/form-elements/slider", element: <ExSlider /> },
       { path: "/form-elements/switch", element: <ExSwitch /> },
       { path: "users/", exact:true, element: <UserLayouts /> },
+      { path: "molding/", exact:true, element: <MoldLayouts /> },
+      { path: "productparts/", exact:true, element: <ProductPartsLayouts /> },
     ],
   },
 ];
