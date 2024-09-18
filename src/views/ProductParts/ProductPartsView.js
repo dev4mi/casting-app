@@ -11,20 +11,20 @@ import {
   IconButton,
 } from "@mui/material";
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
-
+import { Fab } from '@mui/material';
 import ProductContext from '../../context/ProductContext';
 import PartContext from '../../context/PartContext';
 import ProductPartsContext from '../../context/ProductPartsContext';
-import { ConfirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 
 const ProductPartsView = () => {
-  const { products, getAllProducts } = useContext(ProductContext);
+  const { products, setProducts, getAllProducts, addProduct } = useContext(ProductContext);
   const { parts, getAllParts } = useContext(PartContext);
-  const { productParts, getAllProductParts, addProductParts, updateProductParts, deleteProductParts, getProductParts } = useContext(ProductPartsContext);
+  const { productParts, getAllProductParts, addProductParts, updateProductParts, deleteProductParts, getProductParts, deleteProduct } = useContext(ProductPartsContext);
 
   const [selectedProductId, setSelectedProductId] = useState('');
   const [productName, setProductName] = useState('');
@@ -47,12 +47,6 @@ const ProductPartsView = () => {
     getAllProductParts();
   }, []);
 
-  // Handle product selection change
-  const handleProductChange = (event) => {
-    setSelectedProductId(event.target.value);
-    setErrors((prev) => ({ ...prev, product_id: '' })); // Clear product error
-  };
-
   // Handle part change (for both part selection and quantity change)
   const handlePartChange = (index, field, value) => {
     const updatedParts = [...currProductParts];
@@ -70,7 +64,31 @@ const ProductPartsView = () => {
 
   // Add a new part entry
   const addPart = () => {
+    let isValid = true;
+    const newErrors = {};
+  
+    // Validate only the last part record
+    const lastIndex = currProductParts.length - 1;
+    const lastPart = currProductParts[lastIndex];
+  
+    if (!lastPart.part_id) {
+      newErrors[`part_${lastIndex}_part_id`] = 'Part is required';
+      isValid = false;
+    }
+    if (!lastPart.part_quantity || lastPart.part_quantity <= 0) {
+      newErrors[`part_${lastIndex}_part_quantity`] = 'Quantity must be greater than 0';
+      isValid = false;
+    }
+  
+    setErrors(newErrors);
+  
+    if (!isValid) {
+      return; // Prevent form submission if validation fails
+    }
     setCurrProductParts([...currProductParts, { part_id: '', part_quantity: 0 }]);
+  };
+  const handleProductNameChange = (e) => {
+    setProductName(e.target.value);
   };
 
   // Remove a part entry (both from UI and, if in edit mode, from the database)
@@ -93,10 +111,12 @@ const ProductPartsView = () => {
     }
   };
 
+
   // Reset the form state
   const resetForm = () => {
     setCurrProductParts([{ part_id: '', part_quantity: 0 }]);
-    setSelectedProduct('');
+    setSelectedProductId('');
+    setProductName('');
     setEditMode(false);
     setEditProductId(null);
     setDeletedParts([]); // Reset deleted parts
@@ -149,10 +169,10 @@ const ProductPartsView = () => {
         for(const part of currProductParts)
         {
           if(part.id != undefined){
-            await updateProductParts(part.id, selectedProduct, part.part_id, part.part_quantity);
+            await updateProductParts(part.id, selectedProductId, part.part_id, part.part_quantity);
           }
           else{
-            await updateProductParts(-1, selectedProduct, part.part_id, part.part_quantity);
+            await updateProductParts(-1, selectedProductId, part.part_id, part.part_quantity);
           }
         }
 
@@ -163,8 +183,9 @@ const ProductPartsView = () => {
         setErrors({});
       } else {
         // Add new product parts
+        let newproduct = await addProduct(productName);
         for (let part of currProductParts) {
-          await addProductParts(selectedProduct, part.part_id, part.part_quantity);
+          await addProductParts(newproduct.product.id, part.part_id, part.part_quantity);
         }
       }
       resetForm();  // Reset the form after successful submission
@@ -187,6 +208,7 @@ const ProductPartsView = () => {
   const handleEdit = async (product) => {
     console.log('Editing product:', product);
     setErrors({});
+    setSelectedProductId(product.id);
     setProductName(product.name); // Select the product
     try {
         const response = await getProductParts(product.id); // Fetch product parts
@@ -214,11 +236,36 @@ const ProductPartsView = () => {
 
 
 
-  // Handle delete action (you can add the logic here)
+  // Handler for delete action
   const handleDelete = (product) => {
-    // Add your delete logic here
+    // setUser(user); // Store the user to delete
+    confirmDialog({
+      message: 'Are you sure you want to delete this product?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => deletingProduct(product), // Call delete function if confirmed
+      reject: () => console.log('Delete rejected')
+    });
   };
+  // Delete function after confirmation
+  const deletingProduct = async (product) => {
+    
+    await deleteProduct(product.id);
+    const updatedProducts = products.filter((pro) => pro.id !== product.id);
 
+    // Update the state with the new products array after deletion
+    setProducts(updatedProducts);
+    resetForm();
+    // const deletedProduct = res.product;
+    // const newProducts = products.filter((product) => 
+    //   !deletedProduct.some(deletedProduct => deletedProduct._id === product._id)
+    // );
+    
+    // Update state with the filtered product parts
+    // setProducts(newProducts);
+    // console.log('Deleted product:', product);
+    // Add your actual delete logic here (e.g., API call)
+  };
   // Action buttons for DataTable (Edit/Delete)
   const actionBodyTemplate = (rowData) => {
     return (
@@ -260,8 +307,8 @@ const ProductPartsView = () => {
                       variant="outlined"
                       name ="product_name"
                       label="Product Name"
+                      onChange={handleProductNameChange}
                       value={productName}
-                      onChange={handleProductChange}
                       disabled={editMode} // Disable product selection in edit mode
                       error={Boolean(errors.product_name)} // Highlights the input field if there's an error
                       helperText={errors.product_name} // Displays the error message
@@ -305,15 +352,37 @@ const ProductPartsView = () => {
                         />
                       </Grid>
 
-                      <Grid item xs={2}>
-                        <IconButton type="button" onClick={() => handlePartDelete(index)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Grid>
+                      {currProductParts.length > 1 && (
+                        <Grid item xs={0.3} style={{ marginRight: '8px', marginTop: '4px' }}> {/* Reduced the margin */}
+                          <Fab 
+                            type='button' 
+                            color="error" 
+                            onClick={() => handlePartDelete(index)} 
+                            size="small"  
+                          >
+                            <DeleteIcon />
+                          </Fab>
+                        </Grid>
+                      )}
+
+                      {currProductParts.length === (index + 1) && (
+                        <Grid item style={{ marginLeft: '8px', marginTop: '4px' }}> {/* Reduced the margin */}
+                          <Fab 
+                            type='button'
+                            color="success" 
+                            onClick={addPart} 
+                            aria-label="add part"
+                            size="small"  
+                          >
+                            <AddIcon />
+                          </Fab>
+                        </Grid>
+                      )}
+
                     </Grid>
                   ))}
                   
-                  <Grid item xs={12}>
+                  {/* <Grid item xs={12}>
                     <Button
                       type="button" 
                       variant="contained"
@@ -323,7 +392,7 @@ const ProductPartsView = () => {
                     >
                       Add Part
                     </Button>
-                  </Grid>
+                  </Grid> */}
                   
                   <Grid item xs={12}>
                     <Button variant="contained" color="primary" type="submit">

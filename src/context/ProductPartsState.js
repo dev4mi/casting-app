@@ -73,6 +73,38 @@ const ProductPartsState = (props) => {
         const newProductParts = productParts.filter((productParts)=>{return productParts._id!==id})
         setProductParts(newProductParts);
       }
+      const deleteProduct = async (id) =>{
+        const response = await fetch(`${host}/api/productparts/deleteproduct/${id}`, {
+          method: "DELETE",
+          headers: {
+            // "auth-token":localStorage.getItem('token'),
+            "Content-Type": "application/json",
+          },
+        });
+        const json = await response.json();
+        // const newProductParts = productParts.filter((productParts)=>{return productParts._id!==id})
+        // setProductParts(newProductParts);
+        if (response.ok) {
+          // const json = await response.json();
+          
+          // Filter out the parts from the frontend that were deleted in the backend
+          const deletedParts = json.product_parts;
+          
+          // Assuming productParts is an array in your state
+          const newProductParts = productParts.filter((part) => 
+            !deletedParts?.some(deletedPart => deletedPart?._id === part?._id)
+          );                
+          
+          // Update state with the filtered product parts
+          setProductParts(newProductParts);
+    
+          console.log(json.success); // Optional: show a success message
+        } else {
+          console.error('Failed to delete product parts');
+        }
+        return json;
+      }
+
       const updateProductParts = async (id, product_id, part_id, part_quantity) =>{
         // const formData = new FormData();
 
@@ -104,7 +136,7 @@ const ProductPartsState = (props) => {
         }
       }
     return (
-        <ProductPartsContext.Provider value={{ productParts, setProductParts, getAllProductParts, addProductParts, updateProductParts, deleteProductParts, getProductParts }}>
+        <ProductPartsContext.Provider value={{ productParts, setProductParts, getAllProductParts, addProductParts, updateProductParts, deleteProductParts, getProductParts, deleteProduct }}>
             {props.children}
         </ProductPartsContext.Provider>
     )
