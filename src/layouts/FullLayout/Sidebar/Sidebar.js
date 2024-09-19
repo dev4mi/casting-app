@@ -31,9 +31,9 @@ const Sidebar = (props) => {
 
   const SidebarContent = (
     <Box sx={{ p: 3, height: "calc(100vh - 40px)" }}>
-      <Link to="/">
+      <Link to="/users">
         <Box sx={{ display: "flex", alignItems: "Center" }}>
-          <LogoIcon />
+          {/* <LogoIcon /> */}<h3>SAND CASTING</h3>
         </Box>
       </Link>
 
@@ -77,7 +77,7 @@ const Sidebar = (props) => {
           })}
         </List>
       </Box>
-      <Buynow />
+      {/* <Buynow /> */}
     </Box>
   );
   if (lgUp) {

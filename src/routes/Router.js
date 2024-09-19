@@ -25,15 +25,16 @@ const FormLayouts = lazy(() => import("../views/FormLayouts/FormLayouts.js"));
 const UserLayouts = lazy(() => import("../views/Users/User.js"));
 const MoldLayouts = lazy(() => import("../views/Molding/MoldingView.js"));
 const ProductPartsLayouts = lazy(() => import("../views/ProductParts/ProductPartsView.js"));
+const LoginLayouts = lazy(() => import("../views/Auth/LoginPage.js"));
 
 /*****Routes******/
-
+// const LoginRoute =  { path: "login", exact:true, element: <LoginLayouts /> }
 const ThemeRoutes = [
   {
     path: "/",
     element: <FullLayout />,
     children: [
-      { path: "/", element: <Navigate to="dashboards/dashboard1" /> },
+      { path: "/", element: <Navigate to="login" /> },
       { path: "dashboards/dashboard1", exact: true, element: <Dashboard1 /> },
       { path: "tables/basic-table", element: <BasicTable /> },
       { path: "/form-layouts/form-layouts", element: <FormLayouts /> },
@@ -43,11 +44,14 @@ const ThemeRoutes = [
       { path: "/form-elements/radio", element: <ExRadio /> },
       { path: "/form-elements/slider", element: <ExSlider /> },
       { path: "/form-elements/switch", element: <ExSwitch /> },
-      { path: "users/", exact:true, element: <UserLayouts /> },
-      { path: "molding/", exact:true, element: <MoldLayouts /> },
-      { path: "productparts/", exact:true, element: <ProductPartsLayouts /> },
+      { path: "/users", exact:true, element: <UserLayouts /> },
+      { path: "/molding", exact:true, element: <MoldLayouts /> },
+      { path: "/productparts", exact:true, element: <ProductPartsLayouts /> },
+     
     ],
   },
+
 ];
 
 export default ThemeRoutes;
+// export {LoginRoute};

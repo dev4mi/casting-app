@@ -1,43 +1,45 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
-  Card,
-  CardContent,
-  Divider,
-  Box,
-  Typography,
-  TextField,
-  // FormControlLabel,
-  // Checkbox,
+  Card, CardContent, Divider, Box, Typography, TextField,
+  // FormControlLabel, 
+  // Checkbox, 
   // Button,
-  Grid,
   // RadioGroup,
   // Radio,
   // FormControl,
-  MenuItem,
+  MenuItem, Grid2, Fab, 
+  InputLabel, OutlinedInput, InputAdornment, FormControl,
 } from "@mui/material";
+import { Delete as DeleteIcon, Edit as EditIcon, Search } from '@mui/icons-material';
+
 import UserContext from '../../context/UserContext';
 import RoleContext  from '../../context/RoleContext';
 
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext'; 
-import { Button } from 'primereact/button'; 
+import { Button as PrimeButton } from 'primereact/button'; 
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'; 
 
+
 const User = (props) => {
+
   const fileInputRef = useRef(null);
   const { users, getAllUsers, addUser, deleteUser, updateUser } = useContext(UserContext);
   const { roles, setRoles, getAllRoles } = useContext(RoleContext);
 
   const [user, setUser] = useState({name: "", lastname: "", email: "", password:"", confirm_password: "", contact_number:"", role_id: 0, profile_pic: ""});
   const [errors, setErrors] = useState({}); // State to store errors
-  const [isUpdate, setIsUpdate] = useState(false);
+  const [editMode, setEditMode] = useState(false); // Flag for edit mode
   const columns = [
-    { field: 'name', header: 'Name' },
-    { field: 'lastname', header: 'LastName' },
+    { field: 'name', header: 'First Name' },
+    { field: 'lastname', header: 'Last Name' },
     { field: 'email', header: 'Email' },
     { field: 'contact_number', header: 'Contact No' }
   ];
+  const indexBodyTemplate = (rowData, { rowIndex }) => {
+    return <span>{rowIndex + 1}</span>; // Indexing starts from 1
+  };
 
   const [number, setNumber] = React.useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -66,7 +68,7 @@ const User = (props) => {
       profile_pic: user.profile_pic,
     });
     setNumber(user.role_id);
-    setIsUpdate(true);
+    setEditMode(true);
      // Set the preview image for the existing user profile picture
     if (user.profile_pic) {
       // Assuming the image is served from 'http://localhost:5000/uploads/'
@@ -103,18 +105,26 @@ const User = (props) => {
   // Action buttons column
   const actionBodyTemplate = (rowData) => {
     return (
-      <React.Fragment>
-        <Button
-          icon="pi pi-pencil" // PrimeReact pencil icon for edit
-          className="p-button-rounded p-button-success"
-          onClick={() => handleEdit(rowData)} style={{ marginRight: '4px' }}
-        />
-        <Button
-          icon="pi pi-trash" // PrimeReact trash icon for delete
-          className="p-button-rounded p-button-danger"
+      <>        
+        <Fab 
+          type='button'
+          color="success" 
+          size="small" 
+          onClick={() => handleEdit(rowData)} 
+          style={{ marginRight: '4px' }}
+        >
+          <EditIcon />
+        </Fab>
+
+        <Fab 
+          type='button'
+          color="error" 
+          size="small" 
           onClick={() => handleDelete(rowData)}
-        />
-      </React.Fragment>
+        >
+          <DeleteIcon />
+        </Fab>
+      </>
     );
   };
   const validateForm = () => {
@@ -167,12 +177,12 @@ const User = (props) => {
       try{
         if(validateForm()){
           console.log('all ok');
-          if(!isUpdate){
+          if(!editMode){
             await addUser(user.name, user.lastname, user.email, user.contact_number, user.password, user.role_id, selectedFile);
           }
           else{
             await updateUser(user._id, user.name, user.lastname, user.email, user.contact_number, user.password, user.role_id, selectedFile);
-            setIsUpdate(false);
+            setEditMode(false);
           }
           setErrors({});
           // props.showAlert("User added successfully.","success");
@@ -221,6 +231,7 @@ const resetForm = () => {
   setNumber(0);
   setSelectedFile(null);
   setPreviewImage(null); 
+  setEditMode(false);
   fileInputRef.current.value = ''; // Reset the file input
 };
   // const [state, setState] = React.useState({
@@ -241,8 +252,8 @@ const resetForm = () => {
 
   return (
     <div>
-      <Grid container spacing={0}>
-      <Grid item lg={12} md={12} xs={12}>
+      <Grid2 container spacing={{ xs: 2, md: 3 }}>
+      <Grid2 size={{ xs: 12, md: 12 }}>
         <Card
           variant="outlined"
           sx={{
@@ -273,161 +284,181 @@ const resetForm = () => {
               padding: "30px",
             }}
           >
-            <form encType='multipart/form-data' onSubmit={handleSubmit}>
-            <TextField
-                id="name"
-                name="name"
-                label="First Name"
-                variant="outlined"
-                fullWidth
-                onChange={onChange}
-                value={user.name}
-                error={Boolean(errors.name)}
-                helperText={errors.name}
-                sx={{ mb: 2 }}
-            />
 
-               <TextField
-                id="lastname"
-                name="lastname"
-                label="Last Name"
-                variant="outlined"
-                // defaultValue="George deo"
-                fullWidth
-                onChange={onChange}
-                value={user.lastname}
-                error={Boolean(errors.lastname)} // Highlights the input field if there's an error
-                helperText={errors.lastname} // Displays the error message
-                sx={{
-                  mb: 2,
-                }}
-              />
-              <TextField
-                id="email"
-                name="email"
-                label="Email"
-                type="email"
-                variant="outlined"
-                fullWidth
-                onChange={onChange}
-                value={user.email}
-                error={Boolean(errors.email)} // Highlights the input field if there's an error
-                helperText={errors.email} // Displays the error message
-                sx={{
-                  mb: 2,
-                }}
-              />
-               <TextField
-                id="contact_number"
-                name="contact_number"
-                label="Contact Number"
-                type="number"
-                variant="outlined"
-                // defaultValue="George deo"
-                fullWidth
-                onChange={onChange}
-                value={user.contact_number}
-                error={Boolean(errors.contact_number)} // Highlights the input field if there's an error
-                helperText={errors.contact_number} // Displays the error message
-                sx={{
-                  mb: 2,
-                }}
-              />
-              <TextField
-                id="password"
-                name="password"
-                label="Password"
-                type="password"
-                // autoComplete="current-password"
-                variant="outlined"
-                fullWidth
-                onChange={onChange}
-                value={user.password}
-                error={Boolean(errors.password)} // Highlights the input field if there's an error
-                helperText={errors.password} // Displays the error message
-                sx={{
-                  mb: 2,
-                }}
-              />
-              <TextField
-                id="confirm_password"
-                name="confirm_password"
-                label="Confirm Password"
-                type="password"
-                // autoComplete="current-password"
-                variant="outlined"
-                fullWidth
-                onChange={onChange}
-                value={user.confirm_password}
-                error={Boolean(errors.confirm_password)} // Highlights the input field if there's an error
-                helperText={errors.confirm_password} // Displays the error message
-                sx={{
-                  mb: 2,
-                }}
-              />
-             
-              <Grid
-                container
-                spacing={0}
-                sx={{
-                  mb: 2,
-                }}
-              >              
-             
-              </Grid>
-              <TextField
-                fullWidth
-                id="role_id"
-                name="role_id"
-                variant="outlined"
-                select
-                label="Select User Role"
-                value={number}                
-                onChange={handleChange3}
-                error={Boolean(errors.role_id)} // Highlights the input field if there's an error
-                helperText={errors.role_id} // Displays the error message
-                sx={{
-                  mb: 2,
-                }}
-              >
-               {Array.isArray(roles) && roles.map((option) => (
-                  <MenuItem key={option.id} value={option.id}>
-                    {option.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-              {/* File input for profile picture */}
-              <TextField
-                  id="profile_pic"
-                  name="profile_pic"
-                  type="file"
+            <form encType='multipart/form-data' onSubmit={handleSubmit}>
+            <Grid2 container spacing={{ xs: 2, md: 3 }}>
+            <Grid2 size={{ xs: 6, md: 4 }}>
+                <TextField
+                    id="name"
+                    name="name"
+                    label="First Name"
+                    variant="outlined"
+                    fullWidth
+                    onChange={onChange}
+                    value={user.name}
+                    error={Boolean(errors.name)}
+                    helperText={errors.name}
+                    sx={{ mb: 2 }}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 6, md: 4 }}>
+                <TextField
+                  id="lastname"
+                  name="lastname"
+                  label="Last Name"
+                  variant="outlined"
+                  // defaultValue="George deo"
+                  fullWidth
+                  onChange={onChange}
+                  value={user.lastname}
+                  error={Boolean(errors.lastname)} // Highlights the input field if there's an error
+                  helperText={errors.lastname} // Displays the error message
+                  sx={{
+                    mb: 2,
+                  }}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 6, md: 4 }}>
+                <TextField
+                  id="email"
+                  name="email"
+                  label="Email"
+                  type="email"
                   variant="outlined"
                   fullWidth
-                  accept="image/*"
-                  onChange={onFileChange}
-                  ref={fileInputRef}
-                  sx={{ mb: 2 }}
+                  onChange={onChange}
+                  value={user.email}
+                  error={Boolean(errors.email)} // Highlights the input field if there's an error
+                  helperText={errors.email} // Displays the error message
+                  sx={{
+                    mb: 2,
+                  }}
                 />
-              {previewImage && (
-                  <div>
-                    <img
-                      src={previewImage}
-                      alt="Preview"
-                      style={{ width: '60px', height: '60px', marginTop: '10px' }}
-                    />
-                  </div>
-                )}
-                <br />
-              <div>
-              <Button
-                variant="contained" // For Material-UI
-                color="primary"     // For Material-UI
-                type="submit"
-              >
-                {isUpdate?"Update":"Add"}
-              </Button>
-
-              </div>
+                </Grid2>
+                <Grid2 size={{ xs: 6, md: 4 }}>
+                <TextField
+                  id="contact_number"
+                  name="contact_number"
+                  label="Contact Number"
+                  type="number"
+                  variant="outlined"
+                  // defaultValue="George deo"
+                  fullWidth
+                  onChange={onChange}
+                  value={user.contact_number}
+                  error={Boolean(errors.contact_number)} // Highlights the input field if there's an error
+                  helperText={errors.contact_number} // Displays the error message
+                  sx={{
+                    mb: 2,
+                  }}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 6, md: 4 }}>
+                <TextField
+                  id="password"
+                  name="password"
+                  label="Password"
+                  type="password"
+                  // autoComplete="current-password"
+                  variant="outlined"
+                  fullWidth
+                  onChange={onChange}
+                  value={user.password}
+                  error={Boolean(errors.password)} // Highlights the input field if there's an error
+                  helperText={errors.password} // Displays the error message
+                  sx={{
+                    mb: 2,
+                  }}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 6, md: 4 }}>
+                <TextField
+                  id="confirm_password"
+                  name="confirm_password"
+                  label="Confirm Password"
+                  type="password"
+                  // autoComplete="current-password"
+                  variant="outlined"
+                  fullWidth
+                  onChange={onChange}
+                  value={user.confirm_password}
+                  error={Boolean(errors.confirm_password)} // Highlights the input field if there's an error
+                  helperText={errors.confirm_password} // Displays the error message
+                  sx={{
+                    mb: 2,
+                  }}
+                />
+              </Grid2>
+              <Grid2 size={{ xs: 6, md: 4 }}>
+             
+                <TextField
+                  fullWidth
+                  id="role_id"
+                  name="role_id"
+                  variant="outlined"
+                  select
+                  label="Select User Role"
+                  value={number}                
+                  onChange={handleChange3}
+                  error={Boolean(errors.role_id)} // Highlights the input field if there's an error
+                  helperText={errors.role_id} // Displays the error message
+                  sx={{
+                    mb: 2,
+                  }}
+                >
+                {Array.isArray(roles) && roles.map((option) => (
+                    <MenuItem key={option.id} value={option.id}>
+                      {option.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid2>
+              <Grid2 size={{ xs: 6, md: 4 }}>
+                {/* File input for profile picture */}
+                <TextField
+                    id="profile_pic"
+                    name="profile_pic"
+                    type="file"
+                    variant="outlined"
+                    fullWidth
+                    accept="image/*"
+                    onChange={onFileChange}
+                    ref={fileInputRef}
+                    sx={{ mb: 2 }}
+                  />
+              </Grid2>
+              <Grid2 size={{ xs: 6, md: 4 }}>
+                {previewImage && (
+                    <div>
+                      <img
+                        src={previewImage}
+                        alt="Preview"
+                        style={{ width: '100px', height: '100px', marginTop: '0px' }}
+                      />
+                    </div>
+                  )}
+                   
+              </Grid2>
+              <Grid2 size={{ xs: 12, md: 12 }}>
+                <PrimeButton
+                  variant="contained" // For Material-UI
+                  color="primary"     // For Material-UI
+                  type="submit"
+                >
+                  {editMode ? "Update": "Add" }
+                </PrimeButton>
+                <PrimeButton
+                  type="button" 
+                  variant="contained"
+                  color="secondary"
+                  onClick={resetForm}
+                  style={{ marginLeft: '10px' }}
+                >
+                  Cancel
+                </PrimeButton>
+            </Grid2>
+        
+            </Grid2>
             </form>
             {/* {users.map((user)=>{
                 return <p>{user.name}</p>
@@ -435,20 +466,27 @@ const resetForm = () => {
             <div className="card" style={{ marginTop: '2rem' }}>
             <ConfirmDialog />
              <div className="p-mb-4">
-                {/* Search input */}
-                <span className="p-input-icon-left">
-                  <i className="pi pi-search" />
-                  <InputText
-                    type="search"
-                    onInput={onGlobalFilterChange}
-                    placeholder="Search..."
-                    value={globalFilter}
-                  />
-                </span>
+             <FormControl sx={{ m: 1 }} variant="outlined">
+                <InputLabel htmlFor="search-input">Search</InputLabel>
+                <OutlinedInput
+                  id="search-input"
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <Search />
+                    </InputAdornment>
+                  }
+                  label="Search" 
+                  onChange={onGlobalFilterChange} 
+                  placeholder="Search..."
+                  value={globalFilter}
+                />
+              </FormControl>
+
               </div>
                 <DataTable value={users} paginator rows={10} header="User Data" globalFilter={globalFilter} // Apply the global filter to DataTable
                   sortMode="multiple" // Allow multiple column sorting
                 >
+                  <Column header="Id" body={indexBodyTemplate} style={{ width: '80px' }} />
                   {columns.map((col, index) => (
                     <Column key={index} field={col.field} header={col.header} sortable />
                   ))}
@@ -458,8 +496,8 @@ const resetForm = () => {
               </div>
           </CardContent>
         </Card>
-      </Grid>
-    </Grid>
+      </Grid2>
+    </Grid2>
     </div>
   )
 }

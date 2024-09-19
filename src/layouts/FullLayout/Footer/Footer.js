@@ -5,11 +5,19 @@ import {
     Typography,
     
   } from "@mui/material";
+import FavoriteIcon from '@mui/icons-material/Favorite'; 
 const Footer = () => {
     return ( 
-        <Box sx={{p:3, textAlign:'center'}}>
-            <Typography>© 2023 All rights reserved by <Link href="https://www.wrappixel.com">Wrappixel.com</Link> </Typography>
-        </Box>
+        <>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 3 }}>
+                <Box sx={{ textAlign: 'left' }}>
+                    <Typography>Sand Casting © {new Date().getFullYear()}</Typography>
+                </Box>
+                <Box sx={{ textAlign: 'right' }}>
+                    <Typography>Developed with  <FavoriteIcon sx={{ color: 'red', mx: 0.5 }} /> By 4m!</Typography>
+                </Box>
+            </Box>
+        </>
      );
 }
  

@@ -4,7 +4,9 @@ import { useState } from "react";
 const ProductPartsState = (props) => {
   const host = "http://localhost:5000";
     const productpartsInitial = [];
+    const productwithpartsInitial = [];
       const [productParts, setProductParts]= useState(productpartsInitial);
+      const [productWithParts, setProductWithParts]= useState(productwithpartsInitial);
       const [currProductParts, setCurrProductParts]= useState([]);
       const getAllProductParts = async () =>{
           const response = await fetch(`${host}/api/productparts/fetchallproductparts`, {
@@ -23,12 +25,25 @@ const ProductPartsState = (props) => {
           method: "GET",
           headers: {
           //   "auth-token":localStorage.getItem('token'),
+              "Content-Type": "application/json",
+            }
+          });
+          const json = await response.json();
+          // console.log(json);
+          setCurrProductParts(json);
+          return json;
+      }
+      const getAllProductWithParts = async (id) =>{
+        const response = await fetch(`${host}/api/productparts/fetchallproductswithparts`, {
+          method: "GET",
+          headers: {
+          //   "auth-token":localStorage.getItem('token'),
             "Content-Type": "application/json",
           }
         });
         const json = await response.json();
         // console.log(json);
-        setCurrProductParts(json);
+        setProductWithParts(json);
         return json;
     }
    
@@ -136,7 +151,7 @@ const ProductPartsState = (props) => {
         }
       }
     return (
-        <ProductPartsContext.Provider value={{ productParts, setProductParts, getAllProductParts, addProductParts, updateProductParts, deleteProductParts, getProductParts, deleteProduct }}>
+        <ProductPartsContext.Provider value={{ productParts, setProductParts, getAllProductParts, getAllProductWithParts, productWithParts,  setProductWithParts, addProductParts, updateProductParts, deleteProductParts, getProductParts, deleteProduct }}>
             {props.children}
         </ProductPartsContext.Provider>
     )

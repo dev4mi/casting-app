@@ -1,16 +1,14 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import {
-  Card,
-  CardContent,
-  Divider,
-  Box,
-  Typography,
-  TextField,
-  Grid,
-  MenuItem,
-  IconButton,
+  Card, CardContent, Divider, Box, Typography, TextField, MenuItem, Chip, 
+  InputAdornment,
+  InputLabel,
+  FormControl,
+  OutlinedInput,
+  Grid2,
 } from "@mui/material";
-import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+
+import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Search } from '@mui/icons-material';
 import { Fab } from '@mui/material';
 import ProductContext from '../../context/ProductContext';
 import PartContext from '../../context/PartContext';
@@ -19,22 +17,25 @@ import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
 
 const ProductPartsView = () => {
   const { products, setProducts, getAllProducts, addProduct } = useContext(ProductContext);
   const { parts, getAllParts } = useContext(PartContext);
-  const { productParts, getAllProductParts, addProductParts, updateProductParts, deleteProductParts, getProductParts, deleteProduct } = useContext(ProductPartsContext);
+  const { productParts, getAllProductParts, productWithParts, setProductWithParts, getAllProductWithParts, addProductParts, updateProductParts,
+     deleteProductParts, getProductParts, deleteProduct } = useContext(ProductPartsContext);
 
   const [selectedProductId, setSelectedProductId] = useState('');
   const [productName, setProductName] = useState('');
   const [currProductParts, setCurrProductParts] = useState([{ part_id: '', part_quantity: 0 }]);
   const [globalFilter, setGlobalFilter] = useState('');
+  const [filter, setFilter] = useState('');
+  const [partsFilter, setPartsFilter] = useState('');
   const [editMode, setEditMode] = useState(false); // Flag for edit mode
   const [editProductId, setEditProductId] = useState(null); // ID for product being edited
   const [deletedParts, setDeletedParts] = useState([]); // Store deleted parts to send to the backend
   const [errors, setErrors] = useState({}); // State to store errors
-  
+  const partsFilterRef = useRef(null);
+
   // Columns for the data table
   const columns = [
     { field: 'name', header: 'Product' },
@@ -45,7 +46,45 @@ const ProductPartsView = () => {
     getAllProducts();
     getAllParts();
     getAllProductParts();
-  }, []);
+    getAllProductWithParts();
+    if (partsFilterRef.current) {
+      partsFilterRef.current.focus();
+    }
+  }, [partsFilter]);
+
+    // Custom body template to format the parts column
+    const partsBodyTemplate = (rowData) => {
+      return (
+        <div>
+          {rowData.parts.map((part, index) => (
+               <Chip
+                key={index}
+                sx={{
+                  pl: "4px",
+                  pr: "4px",
+                  mr: "4px",
+                  backgroundColor: "primary.main",
+                  color: "#fff",
+                }}
+                size="small"
+                label={`${part.name}: ${part.quantity}`} 
+              ></Chip>
+             
+           
+          ))}
+        </div>
+      );
+    };
+    // Filter rows based on both product name and parts
+  const filteredProducts = productWithParts.filter(product => {
+    const filterLower = filter.toLowerCase();
+    const productNameMatch = product.name.toLowerCase().includes(filterLower);
+    const partsMatch = product.parts.some(part =>
+      part.name.toLowerCase().includes(filterLower) ||
+      part.quantity.toString().includes(filterLower)
+    );
+    return productNameMatch || partsMatch;
+  });
 
   // Handle part change (for both part selection and quantity change)
   const handlePartChange = (index, field, value) => {
@@ -72,11 +111,17 @@ const ProductPartsView = () => {
     const lastPart = currProductParts[lastIndex];
   
     if (!lastPart.part_id) {
-      newErrors[`part_${lastIndex}_part_id`] = 'Part is required';
+      newErrors[`part_${lastIndex}_part_id`] = 'Part is required!';
       isValid = false;
     }
-    if (!lastPart.part_quantity || lastPart.part_quantity <= 0) {
-      newErrors[`part_${lastIndex}_part_quantity`] = 'Quantity must be greater than 0';
+    if (lastPart.part_quantity == '' && lastPart.part_quantity != '0')
+    {
+      newErrors[`part_${lastIndex}_part_quantity`] = 'Quantity is required!';
+      isValid = false;
+    }
+    else if(lastPart.part_quantity < 0)
+    {
+      newErrors[`part_${lastIndex}_part_quantity`] = 'Quantity must be greater than 0!';
       isValid = false;
     }
   
@@ -146,11 +191,15 @@ const ProductPartsView = () => {
       // Check if at least one part is valid
       currProductParts.forEach((part, index) => {
         if (!part.part_id) {
-          newErrors[`part_${index}_part_id`] = 'Part is required';
+          newErrors[`part_${index}_part_id`] = 'Part is required!';
           isValid = false;
         }
-        if (!part.part_quantity || part.part_quantity <= 0) {
-          newErrors[`part_${index}_part_quantity`] = 'Quantity must be greater than 0';
+        if (part.part_quantity == '' && part.part_quantity != '0'){
+          newErrors[`part_${index}_part_quantity`] = 'Quantity is required!';
+          isValid = false;
+        } 
+        else if(part.part_quantity < 0) {
+          newErrors[`part_${index}_part_quantity`] = 'Quantity must be greater than 0!';
           isValid = false;
         }
       });
@@ -256,39 +305,38 @@ const ProductPartsView = () => {
     // Update the state with the new products array after deletion
     setProducts(updatedProducts);
     resetForm();
-    // const deletedProduct = res.product;
-    // const newProducts = products.filter((product) => 
-    //   !deletedProduct.some(deletedProduct => deletedProduct._id === product._id)
-    // );
-    
-    // Update state with the filtered product parts
-    // setProducts(newProducts);
-    // console.log('Deleted product:', product);
-    // Add your actual delete logic here (e.g., API call)
+ 
   };
   // Action buttons for DataTable (Edit/Delete)
   const actionBodyTemplate = (rowData) => {
     return (
-      <>
-        <Button
-          icon="pi pi-pencil"
-          className="p-button-rounded p-button-success"
-          onClick={() => handleEdit(rowData)}
+      <>        
+        <Fab 
+          type='button'
+          color="success" 
+          size="small" 
+          onClick={() => handleEdit(rowData)} 
           style={{ marginRight: '4px' }}
-        />
-        <Button
-          icon="pi pi-trash"
-          className="p-button-rounded p-button-danger"
+        >
+          <EditIcon />
+        </Fab>
+
+        <Fab 
+          type='button'
+          color="error" 
+          size="small" 
           onClick={() => handleDelete(rowData)}
-        />
+        >
+          <DeleteIcon />
+        </Fab>
       </>
     );
   };
 
   return (
     <div>
-      <Grid container spacing={3}>
-        <Grid item xs={12}>
+      <Grid2 container spacing={{ xs: 2, md: 3 }}>
+        <Grid2 size={{ xs: 12, md: 12 }}>
           <Card variant="outlined">
             <Box padding="15px 30px" display="flex" alignItems="center">
               <Box flexGrow={3}>
@@ -300,8 +348,8 @@ const ProductPartsView = () => {
             <Divider />
             <CardContent padding="30px">
               <form onSubmit={handleSubmit}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={4}>
+                <Grid2 container spacing={{ xs: 2, md: 3 }}>
+                <Grid2 size={{ xs: 6, md: 4 }}>
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -317,11 +365,11 @@ const ProductPartsView = () => {
                       }}
                     >                      
                     </TextField>
-                  </Grid>
+                  </Grid2>
 
                   {Array.isArray(currProductParts) && currProductParts.map((part, index) => (
-                    <Grid container spacing={2} m={1} key={index}>
-                      <Grid item xs={4}>
+                     <Grid2 container size={{xs:12}} spacing={{ xs: 2, md: 3 }} key={index}>
+                      <Grid2 size={{ xs: 6, md: 4 }}>
                         <TextField
                           fullWidth
                           variant="outlined"
@@ -338,9 +386,9 @@ const ProductPartsView = () => {
                             </MenuItem>
                           ))}
                         </TextField>
-                      </Grid>
+                      </Grid2>
 
-                      <Grid item xs={4}>
+                      <Grid2 size={{ xs: 4, md: 4 }}>
                         <TextField
                           fullWidth
                           type="number"
@@ -350,10 +398,11 @@ const ProductPartsView = () => {
                           error={Boolean(errors[`part_${index}_part_quantity`])}
                           helperText={errors[`part_${index}_part_quantity`]}
                         />
-                      </Grid>
+                      </Grid2>
 
                       {currProductParts.length > 1 && (
-                        <Grid item xs={0.3} style={{ marginRight: '8px', marginTop: '4px' }}> {/* Reduced the margin */}
+                        <Grid2 size={{ xs: 0.5 }}>
+                        {/* // <Grid2 item xs={0.3} style={{ marginRight: '8px', marginTop: '4px' }}> Reduced the margin */}
                           <Fab 
                             type='button' 
                             color="error" 
@@ -362,11 +411,12 @@ const ProductPartsView = () => {
                           >
                             <DeleteIcon />
                           </Fab>
-                        </Grid>
+                        </Grid2>
                       )}
 
                       {currProductParts.length === (index + 1) && (
-                        <Grid item style={{ marginLeft: '8px', marginTop: '4px' }}> {/* Reduced the margin */}
+                        <Grid2 size={{ xs: 2, md: 2 }}>
+                        {/* <Grid2 item style={{ marginLeft: '8px', marginTop: '4px' }}> Reduced the margin */}
                           <Fab 
                             type='button'
                             color="success" 
@@ -376,29 +426,16 @@ const ProductPartsView = () => {
                           >
                             <AddIcon />
                           </Fab>
-                        </Grid>
+                        </Grid2>
                       )}
 
-                    </Grid>
+                    </Grid2>
                   ))}
-                  
-                  {/* <Grid item xs={12}>
-                    <Button
-                      type="button" 
-                      variant="contained"
-                      color="primary"
-                      startIcon={<AddIcon />}
-                      onClick={addPart}
-                    >
-                      Add Part
-                    </Button>
-                  </Grid> */}
-                  
-                  <Grid item xs={12}>
+                                 
+                  <Grid2 size={{ xs: 12, md: 12 }}>
                     <Button variant="contained" color="primary" type="submit">
-                      {editMode ? 'Update Parts' : 'Submit'}
+                      {editMode ? 'Update' : 'Add'}
                     </Button>
-                    {editMode && (
                       <Button
                         type="button" 
                         variant="contained"
@@ -406,38 +443,40 @@ const ProductPartsView = () => {
                         onClick={resetForm}
                         style={{ marginLeft: '10px' }}
                       >
-                        Cancel Edit
+                        Cancel
                       </Button>
-                    )}
-                  </Grid>
-                </Grid>
+                  </Grid2>
+                </Grid2>
               </form>
              
               <div className="card" style={{ marginTop: '2rem' }}>
                 <ConfirmDialog />
                 <div className="p-mb-4">
-                  <span className="p-input-icon-left">
-                    <i className="pi pi-search" />
-                    <InputText
-                      type="search"
-                      onInput={(e) => setGlobalFilter(e.target.value)}
-                      placeholder="    Search..."
-                      value={globalFilter}
+                  <FormControl sx={{ m: 1 }}>
+                    <InputLabel htmlFor="search-input">Search</InputLabel>
+                    <OutlinedInput
+                      id="search-input"
+                      startAdornment={<InputAdornment position="start"><Search></Search></InputAdornment>}
+                      label="Search"
+                      onInput={(e) => setFilter(e.target.value)}
+                      placeholder="Search..."
+                      value={filter}
                     />
-                  </span>
+                  </FormControl>
                 </div>
-                <DataTable value={products} paginator rows={10} globalFilter={globalFilter} sortMode="multiple">
-                  {columns.map((col, index) => (
-                    <Column key={index} field={col.field} header={col.header} sortable />
-                  ))}
+            
+                <DataTable value={filteredProducts}  header="Product Data" globalFilter={globalFilter} sortMode="multiple" paginator rows={10}>
+                    <Column field="name" header="Product Name" sortable />
+                    <Column header="Parts and Quantities" body={partsBodyTemplate} />
                   <Column header="Actions" body={actionBodyTemplate} />
                 </DataTable>
+                
               </div>
               
             </CardContent>
           </Card>
-        </Grid>
-      </Grid>
+        </Grid2>
+      </Grid2>
     </div>
   );
 };

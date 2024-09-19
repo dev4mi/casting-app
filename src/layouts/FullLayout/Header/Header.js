@@ -72,7 +72,7 @@ const Header = (props) => {
         >
           <MenuOutlinedIcon width="20" height="20" />
         </IconButton>
-        <IconButton
+        {/* <IconButton
           aria-label="menu"
           color="inherit"
           aria-controls="dd-menu"
@@ -80,8 +80,8 @@ const Header = (props) => {
           onClick={handleClick5}
         >
           <AddToPhotosOutlinedIcon />
-        </IconButton>
-        <Menu
+        </IconButton> */}
+        {/* <Menu
           id="dd-menu"
           anchorEl={anchorEl5}
           keepMounted
@@ -143,13 +143,13 @@ const Header = (props) => {
               New Component
             </Box>
           </MenuItem>
-        </Menu>
+        </Menu> */}
         <Box flexGrow={1} />
 
         {/* ------------------------------------------- */}
         {/* Notifications Dropdown */}
         {/* ------------------------------------------- */}
-        <IconButton
+        {/* <IconButton
           aria-label="menu"
           color="inherit"
           aria-controls="notification-menu"
@@ -157,8 +157,8 @@ const Header = (props) => {
           onClick={handleClick}
         >
           <NotificationsNoneOutlinedIcon width="20" height="20" />
-        </IconButton>
-        <Menu
+        </IconButton> */}
+        {/* <Menu
           id="notification-menu"
           anchorEl={anchorEl}
           keepMounted
@@ -177,7 +177,7 @@ const Header = (props) => {
           <MenuItem onClick={handleClose}>Action</MenuItem>
           <MenuItem onClick={handleClose}>Action Else</MenuItem>
           <MenuItem onClick={handleClose}>Another Action</MenuItem>
-        </Menu>
+        </Menu> */}
         {/* ------------------------------------------- */}
         {/* End Notifications Dropdown */}
         {/* ------------------------------------------- */}
@@ -247,12 +247,12 @@ const Header = (props) => {
             </Box>
           </MenuItem>
           <Divider />
-          <MenuItem onClick={handleClose4}>
+          {/* <MenuItem onClick={handleClose4}>
             <ListItemIcon>
               <PersonAddOutlinedIcon fontSize="small" />
             </ListItemIcon>
             Add another account
-          </MenuItem>
+          </MenuItem> */}
           <MenuItem onClick={handleClose4}>
             <ListItemIcon>
               <SettingsOutlinedIcon fontSize="small" />

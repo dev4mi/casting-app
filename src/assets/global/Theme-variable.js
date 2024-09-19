@@ -13,6 +13,7 @@ const TopbarHeight = 70;
 
 const baseTheme = createTheme({
   direction: "ltr",
+  
   palette: {
     primary: {
       main: "#1a97f5",
