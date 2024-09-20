@@ -47,6 +47,7 @@ const UserState = (props) => {
         const response = await fetch(`${host}/api/users/adduser`, {
           method: 'POST',
           headers: {
+            "auth-token":localStorage.getItem('token'),
             // 'Content-Type': 'application/json'
           },
           // body: JSON.stringify({ name, lastname, email, contact_number, password, role_id })
@@ -69,7 +70,7 @@ const UserState = (props) => {
         const response = await fetch(`${host}/api/users/deleteuser/${id}`, {
           method: "DELETE",
           headers: {
-            // "auth-token":localStorage.getItem('token'),
+            "auth-token":localStorage.getItem('token'),
             "Content-Type": "application/json",
           },
         });
@@ -95,7 +96,7 @@ const UserState = (props) => {
         const response = await fetch(`${host}/api/users/updateuser/${id}`, {
           method: "PUT",
           headers: {
-            // "auth-token":localStorage.getItem('token'),
+            "auth-token":localStorage.getItem('token'),
             // "Content-Type": "application/json",
           },
           // body: JSON.stringify({ name, lastname, email, contact_number, password, role_id, profile_pic }),

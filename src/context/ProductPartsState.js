@@ -12,7 +12,7 @@ const ProductPartsState = (props) => {
           const response = await fetch(`${host}/api/productparts/fetchallproductparts`, {
             method: "GET",
             headers: {
-            //   "auth-token":localStorage.getItem('token'),
+              "auth-token":localStorage.getItem('token'),
               "Content-Type": "application/json",
             }
           });
@@ -24,7 +24,7 @@ const ProductPartsState = (props) => {
         const response = await fetch(`${host}/api/productparts/fetchproductparts/${id}`, {
           method: "GET",
           headers: {
-          //   "auth-token":localStorage.getItem('token'),
+              "auth-token":localStorage.getItem('token'),
               "Content-Type": "application/json",
             }
           });
@@ -37,7 +37,7 @@ const ProductPartsState = (props) => {
         const response = await fetch(`${host}/api/productparts/fetchallproductswithparts`, {
           method: "GET",
           headers: {
-          //   "auth-token":localStorage.getItem('token'),
+            "auth-token":localStorage.getItem('token'),
             "Content-Type": "application/json",
           }
         });
@@ -58,6 +58,7 @@ const ProductPartsState = (props) => {
         const response = await fetch(`${host}/api/productparts/addproductparts`, {
           method: 'POST',
           headers: {
+            "auth-token":localStorage.getItem('token'),
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ product_id, part_id, part_quantity })
@@ -73,6 +74,7 @@ const ProductPartsState = (props) => {
         }
         const json = await response.json();
         setProductParts(productParts.concat(json.productParts));
+        
         return json;
       };
       
@@ -80,7 +82,7 @@ const ProductPartsState = (props) => {
         const response = await fetch(`${host}/api/productparts/deleteproductparts/${id}`, {
           method: "DELETE",
           headers: {
-            // "auth-token":localStorage.getItem('token'),
+            "auth-token":localStorage.getItem('token'),
             "Content-Type": "application/json",
           },
         });
@@ -92,7 +94,7 @@ const ProductPartsState = (props) => {
         const response = await fetch(`${host}/api/productparts/deleteproduct/${id}`, {
           method: "DELETE",
           headers: {
-            // "auth-token":localStorage.getItem('token'),
+            "auth-token":localStorage.getItem('token'),
             "Content-Type": "application/json",
           },
         });
@@ -131,7 +133,7 @@ const ProductPartsState = (props) => {
         const response = await fetch(`${host}/api/productparts/updateproductparts/${id}`, {
           method: "PUT",
           headers: {
-            // "auth-token":localStorage.getItem('token'),
+            "auth-token":localStorage.getItem('token'),
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ product_id, part_id, part_quantity }),

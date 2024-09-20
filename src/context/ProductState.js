@@ -9,7 +9,7 @@ const ProductState = (props) => {
           const response = await fetch(`${host}/api/products/fetchallproducts`, {
             method: "GET",
             headers: {
-            //   "auth-token":localStorage.getItem('token'),
+              "auth-token":localStorage.getItem('token'),
               "Content-Type": "application/json",
             }
           });
@@ -23,6 +23,7 @@ const ProductState = (props) => {
         const response = await fetch(`${host}/api/products/addproduct`, {
           method: 'POST',
           headers: {
+            "auth-token":localStorage.getItem('token'),
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ name })
@@ -40,60 +41,43 @@ const ProductState = (props) => {
         return json;
       };
       
-    //   const deleteUser = async (id) =>{
-    //     const response = await fetch(`${host}/api/companies/deleteuser/${id}`, {
-    //       method: "DELETE",
-    //       headers: {
-    //         // "auth-token":localStorage.getItem('token'),
-    //         "Content-Type": "application/json",
-    //       },
-    //     });
-    //     const json = await response.json();
-    //     const newUsers = users.filter((user)=>{return user._id!==id})
-    //     setUsers(newUsers);
-    //   }
-    //   const updateUser = async (id, name, lastname, email, contact_number, password, role_id, profile_pic) =>{
-    //     const formData = new FormData();
+      const deleteProduct = async (id) =>{
+        const response = await fetch(`${host}/api/products/deleteproduct/${id}`, {
+          method: "DELETE",
+          headers: {
+            "auth-token":localStorage.getItem('token'),
+            "Content-Type": "application/json",
+          },
+        });
+        const json = await response.json();
+        const newProducts = products.filter((product)=>{return product.id!==id})
+        setProducts(newProducts);
+      }
 
-    //     // Append all the form data fields
-    //     formData.append('name', name);
-    //     formData.append('lastname', lastname);
-    //     formData.append('email', email);
-    //     formData.append('contact_number', contact_number);
-    //     formData.append('password', password);
-    //     formData.append('role_id', role_id);
-
-    //     // Append the file (profile_pic) if provided
-    //     if (profile_pic) {
-    //       formData.append('profile_pic', profile_pic);
-    //     }
-    //     const response = await fetch(`${host}/api/companies/updateuser/${id}`, {
-    //       method: "PUT",
-    //       headers: {
-    //         // "auth-token":localStorage.getItem('token'),
-    //         // "Content-Type": "application/json",
-    //       },
-    //       // body: JSON.stringify({ name, lastname, email, contact_number, password, role_id, profile_pic }),
-    //       body: formData,
-    //     });
-    //     const json = await response.json();
-    //     let newUsers = JSON.parse(JSON.stringify(users));
-    //     for (let index = 0; index < newUsers.length; index++) {
-    //       const element = newUsers[index];
-    //       if(element._id == id){
-    //         newUsers[index].name = name;
-    //         newUsers[index].lastname = lastname;
-    //         newUsers[index].email = email;
-    //         newUsers[index].contact_number = contact_number;
-    //         newUsers[index].role_id = role_id;
-    //         newUsers[index].profile_pic = json.updateduser.profile_pic;
-    //         setUsers(newUsers);
-    //         break;
-    //       }
-    //     }
-    //   }
+      const updateProduct = async (id, name) =>{
+     
+        const response = await fetch(`${host}/api/products/updateproduct/${id}`, {
+          method: "PUT",
+          headers: {
+            "auth-token":localStorage.getItem('token'),
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name }),
+          
+        });
+        const json = await response.json();
+        let newProducts = JSON.parse(JSON.stringify(products));
+        for (let index = 0; index < newProducts.length; index++) {
+          const element = newProducts[index];
+          if(element._id == id){
+            newProducts[index].name = name;
+            setProducts(newProducts);
+            break;
+          }
+        }
+      }
     return (
-        <ProductContext.Provider value={{ products, setProducts, getAllProducts, addProduct }}>
+        <ProductContext.Provider value={{ products, setProducts, getAllProducts, addProduct, updateProduct, deleteProduct }}>
             {props.children}
         </ProductContext.Provider>
     )

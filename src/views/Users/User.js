@@ -1,14 +1,9 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import {
   Card, CardContent, Divider, Box, Typography, TextField,
-  // FormControlLabel, 
-  // Checkbox, 
-  // Button,
-  // RadioGroup,
-  // Radio,
-  // FormControl,
   MenuItem, Grid2, Fab, 
   InputLabel, OutlinedInput, InputAdornment, FormControl,
+  Button,
 } from "@mui/material";
 import { Delete as DeleteIcon, Edit as EditIcon, Search } from '@mui/icons-material';
 
@@ -20,10 +15,13 @@ import { Column } from 'primereact/column';
 import { InputText } from 'primereact/inputtext'; 
 import { Button as PrimeButton } from 'primereact/button'; 
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'; 
-
+import { AlertContext } from "../../context/AlertContext";
+import { useNavigate } from 'react-router-dom';
 
 const User = (props) => {
+  const navigate = useNavigate();
 
+  const { showAlert } = useContext(AlertContext);
   const fileInputRef = useRef(null);
   const { users, getAllUsers, addUser, deleteUser, updateUser } = useContext(UserContext);
   const { roles, setRoles, getAllRoles } = useContext(RoleContext);
@@ -50,9 +48,15 @@ const User = (props) => {
     setUser((prevUser) => ({ ...prevUser, role_id: event.target.value }));
   };
   useEffect(()=>{
+    if(localStorage.getItem('token')){
       getAllUsers();
       getAllRoles();
+    }
+    else{
+      navigate('/login')
+    }
     //eslint-disable-next-line
+    
   },[])
   const handleEdit = (user) => {
     setErrors({});
@@ -98,6 +102,7 @@ const User = (props) => {
   // Delete function after confirmation
   const deletingUser = async (user) => {
     await deleteUser(user._id);
+    showAlert('User has been deleted.','success');
     console.log('Deleted user:', user);
     // Add your actual delete logic here (e.g., API call)
   };
@@ -179,9 +184,12 @@ const User = (props) => {
           console.log('all ok');
           if(!editMode){
             await addUser(user.name, user.lastname, user.email, user.contact_number, user.password, user.role_id, selectedFile);
+            showAlert('User has been created.','success');
+
           }
           else{
             await updateUser(user._id, user.name, user.lastname, user.email, user.contact_number, user.password, user.role_id, selectedFile);
+            showAlert('User has been updated.','success');
             setEditMode(false);
           }
           setErrors({});
@@ -190,6 +198,8 @@ const User = (props) => {
         }
       }
       catch (error) {
+        showAlert('Something went wrong! Please try again later.','error');
+
         console.error('Error:', error); // Log the full error object
         // Assuming error response contains error messages for each field
         if (error.response && error.response.data.errors) {
@@ -232,6 +242,7 @@ const resetForm = () => {
   setSelectedFile(null);
   setPreviewImage(null); 
   setEditMode(false);
+  setErrors({});
   fileInputRef.current.value = ''; // Reset the file input
 };
   // const [state, setState] = React.useState({
@@ -252,6 +263,7 @@ const resetForm = () => {
 
   return (
     <div>
+     
       <Grid2 container spacing={{ xs: 2, md: 3 }}>
       <Grid2 size={{ xs: 12, md: 12 }}>
         <Card

@@ -17,9 +17,13 @@ import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
+import { AlertContext } from '../../context/AlertContext';
+import { useNavigate } from 'react-router-dom';
 
 const ProductPartsView = () => {
-  const { products, setProducts, getAllProducts, addProduct } = useContext(ProductContext);
+  const navigate = useNavigate();
+  const { showAlert } = useContext(AlertContext);
+  const { products, setProducts, getAllProducts, addProduct, updateProduct } = useContext(ProductContext);
   const { parts, getAllParts } = useContext(PartContext);
   const { productParts, getAllProductParts, productWithParts, setProductWithParts, getAllProductWithParts, addProductParts, updateProductParts,
      deleteProductParts, getProductParts, deleteProduct } = useContext(ProductPartsContext);
@@ -43,12 +47,17 @@ const ProductPartsView = () => {
 
   // Fetch all products, parts, and product parts when component mounts
   useEffect(() => {
-    getAllProducts();
-    getAllParts();
-    getAllProductParts();
-    getAllProductWithParts();
-    if (partsFilterRef.current) {
-      partsFilterRef.current.focus();
+    if(localStorage.getItem('token')){
+       // getAllProducts();
+      getAllParts();
+      // getAllProductParts();
+      getAllProductWithParts();
+      if (partsFilterRef.current) {
+        partsFilterRef.current.focus();
+      }
+    }
+    else{
+      navigate('/login')
     }
   }, [partsFilter]);
 
@@ -146,8 +155,10 @@ const ProductPartsView = () => {
       try {
         // Send a request to delete the part from the product_parts table
         await deleteProductParts(partId);
+        showAlert('Part is deleted successfully.','success');
       } catch (error) {
-        console.error("Error deleting product part:", error);
+        showAlert('Something went wrong! Please try again later.','error');
+
       }
     } else {
       // If we're not in edit mode, just update the state to remove the part locally
@@ -215,6 +226,7 @@ const ProductPartsView = () => {
     try {
       if (editMode) { 
         // Update existing product parts
+        let newproduct = await updateProduct(selectedProductId, productName);
         for(const part of currProductParts)
         {
           if(part.id != undefined){
@@ -224,6 +236,8 @@ const ProductPartsView = () => {
             await updateProductParts(-1, selectedProductId, part.part_id, part.part_quantity);
           }
         }
+        showAlert('Product is updated successfully.','success');
+        await getAllProductWithParts();
 
         // Remove deleted parts from the product if any
         for (const partId of deletedParts) {
@@ -235,11 +249,15 @@ const ProductPartsView = () => {
         let newproduct = await addProduct(productName);
         for (let part of currProductParts) {
           await addProductParts(newproduct.product.id, part.part_id, part.part_quantity);
+          showAlert('Product is added successfully.','success');
+          await getAllProductWithParts();
+
         }
       }
       resetForm();  // Reset the form after successful submission
     }catch (error) {
-      console.error('Error:', error); // Log the full error object
+      showAlert('Something went wrong! Please try again later.','error');
+
       // Assuming error response contains error messages for each field
       if (error.response && error.response.data.errors) {
         console.log(error.response);
@@ -300,7 +318,10 @@ const ProductPartsView = () => {
   const deletingProduct = async (product) => {
     
     await deleteProduct(product.id);
+    showAlert('Product is deleted successfully.','success');
+
     const updatedProducts = products.filter((pro) => pro.id !== product.id);
+    await getAllProductWithParts();
 
     // Update the state with the new products array after deletion
     setProducts(updatedProducts);
@@ -357,7 +378,7 @@ const ProductPartsView = () => {
                       label="Product Name"
                       onChange={handleProductNameChange}
                       value={productName}
-                      disabled={editMode} // Disable product selection in edit mode
+                      // disabled={editMode} // Disable product selection in edit mode
                       error={Boolean(errors.product_name)} // Highlights the input field if there's an error
                       helperText={errors.product_name} // Displays the error message
                       sx={{

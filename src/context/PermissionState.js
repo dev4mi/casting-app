@@ -1,12 +1,12 @@
 import React from "react";
-import PartContext from "./PartContext";
+import PermissionContext from "./PermissionContext";
 import { useState } from "react";
-const PartState = (props) => {
+const PermissionState = (props) => {
   const host = "http://localhost:5000";
-    const partsInitial = [];
-      const [parts, setParts]= useState(partsInitial);
-      const getAllParts = async () =>{
-          const response = await fetch(`${host}/api/parts/fetchallparts`, {
+    const permissionsInitial = [];
+      const [permissions, setPermissions]= useState(permissionsInitial);
+      const getAllPermissions = async () =>{
+          const response = await fetch(`${host}/api/permissions/fetchallpermissions`, {
             method: "GET",
             headers: {
               "auth-token":localStorage.getItem('token'),
@@ -15,12 +15,12 @@ const PartState = (props) => {
           });
           const json = await response.json();
           // console.log(json);
-          setParts(json);
+          setPermissions(json);
       }
    
-      const addPart = async (name) => {
+      const addPermission = async (name) => {
        
-        const response = await fetch(`${host}/api/parts/addpart`, {
+        const response = await fetch(`${host}/api/permissions/addpermission`, {
           method: 'POST',
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -38,12 +38,12 @@ const PartState = (props) => {
       
         }
         const json = await response.json();
-        setParts(parts.concat(json.part));
+        setPermissions(permissions.concat(json.permission));
         return json;
       };
       
-      const deletePart = async (id) =>{
-        const response = await fetch(`${host}/api/parts/deletepart/${id}`, {
+      const deletePermission = async (id) =>{
+        const response = await fetch(`${host}/api/permissions/deletepermission/${id}`, {
           method: "DELETE",
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -51,12 +51,12 @@ const PartState = (props) => {
           },
         });
         const json = await response.json();
-        const newparts = parts.filter((part)=>{return part.id!==id})
-        setParts(newparts);
+        const newPermissions = permissions.filter((permission)=>{return permission.id!==id})
+        setPermissions(newPermissions);
       }
-      const updatePart = async (id, name) =>{
+      const updatePermission = async (id, name) =>{
        
-        const response = await fetch(`${host}/api/parts/updatepart/${id}`, {
+        const response = await fetch(`${host}/api/permissions/updatepermission/${id}`, {
           method: "PUT",
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -65,20 +65,20 @@ const PartState = (props) => {
           body: JSON.stringify({ name }),
         });
         const json = await response.json();
-        let newparts = JSON.parse(JSON.stringify(parts));
-        for (let index = 0; index < newparts.length; index++) {
-          const element = newparts[index];
+        let newPermissions = JSON.parse(JSON.stringify(permissions));
+        for (let index = 0; index < newPermissions.length; index++) {
+          const element = newPermissions[index];
           if(element.id == id){
-            newparts[index].name = name;
-            setParts(newparts);
+            newPermissions[index].name = name;
+            setPermissions(newPermissions);
             break;
           }
         }
       }
     return (
-        <PartContext.Provider value={{ parts, setParts, getAllParts, addPart, updatePart, deletePart }}>
+        <PermissionContext.Provider value={{ permissions, setPermissions, getAllPermissions, addPermission, updatePermission, deletePermission }}>
             {props.children}
-        </PartContext.Provider>
+        </PermissionContext.Provider>
     )
 }
-export default PartState;
+export default PermissionState;

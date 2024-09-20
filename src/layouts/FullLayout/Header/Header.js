@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 //import { Link } from 'react-router-dom';
 
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
@@ -45,6 +45,13 @@ const Header = (props) => {
     setAnchorEl4(null);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setAnchorEl4(null);
+    window.location.reload();
+  };
+  
+
   // 5
   const [anchorEl5, setAnchorEl5] = React.useState(null);
 
@@ -55,7 +62,7 @@ const Header = (props) => {
   const handleClose5 = () => {
     setAnchorEl5(null);
   };
-
+ 
   return (
     <AppBar sx={props.sx} elevation={0} className={props.customClass}>
       <Toolbar>
@@ -259,7 +266,7 @@ const Header = (props) => {
             </ListItemIcon>
             Settings
           </MenuItem>
-          <MenuItem onClick={handleClose4}>
+          <MenuItem onClick={handleLogout}>
             <ListItemIcon>
               <LogoutOutlinedIcon fontSize="small" />
             </ListItemIcon>
@@ -267,6 +274,7 @@ const Header = (props) => {
           </MenuItem>
         </Menu>
       </Toolbar>
+
     </AppBar>
   );
 };

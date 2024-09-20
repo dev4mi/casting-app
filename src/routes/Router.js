@@ -23,7 +23,10 @@ const ExSwitch = lazy(() => import("../views/FormElements/ExSwitch.js"));
 // form layouts
 const FormLayouts = lazy(() => import("../views/FormLayouts/FormLayouts.js"));
 const UserLayouts = lazy(() => import("../views/Users/User.js"));
+const PermissionLayouts = lazy(() => import("../views/Permissions/PermissionView.js"));
+const RoleLayouts = lazy(() => import("../views/Roles/RoleView.js"));
 const MoldLayouts = lazy(() => import("../views/Molding/MoldingView.js"));
+const PartsLayouts = lazy(() => import("../views/Parts/PartView.js"));
 const ProductPartsLayouts = lazy(() => import("../views/ProductParts/ProductPartsView.js"));
 const LoginLayouts = lazy(() => import("../views/Auth/LoginPage.js"));
 
@@ -45,6 +48,9 @@ const ThemeRoutes = [
       { path: "/form-elements/slider", element: <ExSlider /> },
       { path: "/form-elements/switch", element: <ExSwitch /> },
       { path: "/users", exact:true, element: <UserLayouts /> },
+      { path: "/roles", exact:true, element: <RoleLayouts /> },
+      { path: "/permissions", exact:true, element: <PermissionLayouts /> },
+      { path: "/parts", exact:true, element: <PartsLayouts /> },
       { path: "/molding", exact:true, element: <MoldLayouts /> },
       { path: "/productparts", exact:true, element: <ProductPartsLayouts /> },
      

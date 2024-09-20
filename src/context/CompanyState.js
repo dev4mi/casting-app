@@ -9,7 +9,7 @@ const CompanyState = (props) => {
           const response = await fetch(`${host}/api/companies/fetchallcompanies`, {
             method: "GET",
             headers: {
-            //   "auth-token":localStorage.getItem('token'),
+              "auth-token":localStorage.getItem('token'),
               "Content-Type": "application/json",
             }
           });

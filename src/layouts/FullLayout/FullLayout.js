@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   experimentalStyled,
   useMediaQuery,
@@ -10,6 +10,8 @@ import Header from "./Header/Header";
 import Sidebar from "./Sidebar/Sidebar";
 import Footer from "./Footer/Footer";
 import { TopbarHeight } from "../../assets/global/Theme-variable";
+import { AlertContext } from "../../context/AlertContext";
+import CustomSnackbar from "../../views/Components/CustomSnackbar";
 
 const MainWrapper = experimentalStyled("div")(({ theme }) => ({
   display: "flex",
@@ -33,9 +35,11 @@ const PageWrapper = experimentalStyled("div")(({ theme }) => ({
 
 const FullLayout = () => {
   //
+  const { snackbarOpen, alert, closeAlert } = useContext(AlertContext);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
+ 
   return (
     <MainWrapper>
       <Header
@@ -67,6 +71,9 @@ const FullLayout = () => {
           <Footer />
         </Container>
       </PageWrapper>
+
+      {/* Display the Snackbar here */}
+      <CustomSnackbar open={snackbarOpen} onClose={closeAlert} alert={alert} />
     </MainWrapper>
   );
 };

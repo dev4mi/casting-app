@@ -60,6 +60,21 @@ const Menuitems = [
     href: "/users",
   },
   {
+    title: "Permissions",
+    icon: AutoAwesomeMosaicOutlinedIcon,
+    href: "/permissions",
+  },
+  {
+    title: "Roles",
+    icon: AutoAwesomeMosaicOutlinedIcon,
+    href: "/roles",
+  },
+  {
+    title: "Parts",
+    icon: AutoAwesomeMosaicOutlinedIcon,
+    href: "/parts",
+  },
+  {
     title: "Products",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/productparts",
