@@ -10,8 +10,8 @@ import {
 } from "@mui/material";
 import { Delete as DeleteIcon, Edit as EditIcon, Label, Search } from '@mui/icons-material';
 
-import RoleContext from '../../context/RoleContext';
-import PermissionContext from '../../context/PermissionContext';
+import CompanyContext from '../../context/CompanyContext';
+import ProductContext from '../../context/ProductContext';
 
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column'; 
@@ -20,20 +20,20 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { AlertContext } from "../../context/AlertContext";
 import { useNavigate } from 'react-router-dom';
 
-const RoleView = (props) => {
+const CompanyView = (props) => {
   const navigate = useNavigate();
   const { showAlert } = useContext(AlertContext);
-  const { rolesWithPermissions, getAllRolesWithPermissions, addRole, deleteRole, updateRole } = useContext(RoleContext);
-  const { permissions, getAllPermissions } = useContext(PermissionContext);
+  const { companiesWithProducts, getAllCompaniesWithProducts, addCompany, deleteCompany, updateCompany } = useContext(CompanyContext);
+  const { products, getAllProducts } = useContext(ProductContext);
 
-  const [role, setRole] = useState({ id: 0, name: "" });
+  const [company, setCompany] = useState({ id: 0, name: "" });
   const [errors, setErrors] = useState({});
   const [editMode, setEditMode] = useState(false);
-  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
   const [globalFilter, setGlobalFilter] = useState(''); // State to hold the search term
 
   const columns = [
-    { field: 'name', header: 'Role Name' },
+    { field: 'name', header: 'Company Name' },
   ];
 
   const indexBodyTemplate = (rowData, { rowIndex }) => {
@@ -42,28 +42,28 @@ const RoleView = (props) => {
 
   useEffect(() => {
     if (localStorage.getItem('token')) {
-      getAllPermissions();
-      getAllRolesWithPermissions();
+      getAllProducts();
+      getAllCompaniesWithProducts();
     } else {
       navigate('/login');
     }
     //eslint-disable-next-line
   }, []);
 
-  const handleEdit = (role) => {
+  const handleEdit = (company) => {
     setErrors({});
 
-    // Find the role from allRolesWithPermissions using the provided roleId
-    const selectedRole = rolesWithPermissions.find(currrole => currrole.id === role.id);
+    // Find the company from allRolesWithPermissions using the provided companyId
+    const selectedProduct = companiesWithProducts.find(currcompany => currcompany.id === company.id);
 
-    if (selectedRole) {
-        setRole({
-            id: selectedRole.id,
-            name: selectedRole.name,
+    if (selectedProduct) {
+        setCompany({
+            id: selectedProduct.id,
+            name: selectedProduct.name,
         });
 
-        // Set the selected permissions based on the found role
-        setSelectedPermissions(selectedRole.permissions.map(p => p.id)); 
+        // Set the selected products based on the found company
+        setSelectedProducts(selectedProduct.products.map(p => p.id)); 
         setEditMode(true);
 
         window.scrollTo({
@@ -71,25 +71,26 @@ const RoleView = (props) => {
             behavior: 'smooth',
         });
     } else {
-        console.error('Role not found:', role.id);
+        console.error('Company not found:', company.id);
     }
 };
+    
 
-
-  const handleDelete = (role) => {
+  const handleDelete = (company) => {
     confirmDialog({
-      message: 'Are you sure you want to delete this role?',
+      message: 'Are you sure you want to delete this company?',
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
-      accept: () => deletingRole(role),
+      accept: () => deletingCompany(company),
       reject: () => console.log('Delete rejected'),
     });
   };
 
-  const deletingRole = async (role) => {
-    await deleteRole(role.id);
+  const deletingCompany = async (company) => {
+    await deleteCompany(company.id);
+    // getAllCompaniesWithProducts();
     resetForm();
-    showAlert('Role has been deleted.', 'success');
+    showAlert('Company has been deleted.', 'success');
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -107,11 +108,11 @@ const RoleView = (props) => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (role.name.length < 3) {
-      newErrors['name'] = 'Enter a valid Role Name. It must be at least 3 characters long.';
+    if (company.name.length < 3) {
+      newErrors['name'] = 'Enter a valid Company Name. It must be at least 3 characters long.';
     }
-    if(selectedPermissions.length <= 0){
-      newErrors['permissions'] = 'Permission is required.';
+    if(selectedProducts.length <= 0){
+      newErrors['products'] = 'Product is required.';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -121,12 +122,12 @@ const RoleView = (props) => {
     e.preventDefault();
     try {
       if (validateForm()) {
-        const roleName= role.name;
+        const productName= company.name;
 
         if (!editMode) {
-          let res = await addRole( roleName, selectedPermissions );
+          let res = await addCompany( productName, selectedProducts );
           if(res.success){
-            showAlert('Role has been created.', 'success');
+            showAlert('Company has been created.', 'success');
             setErrors({});
             resetForm();
           }
@@ -134,13 +135,13 @@ const RoleView = (props) => {
             showAlert('Something went wrong! Please try again later.', 'error');
           }
         } else {
-          let res = await updateRole(role.id, roleName, selectedPermissions );
+          let res = await updateCompany(company.id, productName, selectedProducts );
           if(!res.success)
           {
             setErrors(res.errors);
           }
           else{
-            showAlert('Role has been updated.', 'success');
+            showAlert('Company has been updated.', 'success');
             setEditMode(false);
             setErrors({});
             resetForm();
@@ -157,7 +158,7 @@ const RoleView = (props) => {
   };
 
   const onChange = (e) => {
-    setRole({ ...role, [e.target.name]: e.target.value });
+    setCompany({ ...company, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
@@ -166,27 +167,26 @@ const RoleView = (props) => {
   };
 
   const resetForm = () => {
-    setRole({ name: "" });
-    setSelectedPermissions([]);
+    setCompany({ name: "" });
+    setSelectedProducts([]);
     setEditMode(false);
     setErrors({});
   };
 
-  const handlePermissionChange = (permissionId) => {
-    setSelectedPermissions((prevSelected) => {
-        const newSelected = prevSelected.includes(permissionId)
-            ? prevSelected.filter(id => id !== permissionId)
-            : [...prevSelected, permissionId];
+  const handleProductChange = (event) => {
+    const {
+        target: { value },
+    } = event;
 
-        // Check if there are no selected permissions
-        if (newSelected.length === 0) {
-            setErrors({ permissions: 'Permission is required.' });
-        } else {
-            setErrors({}); // Clear error if at least one permission is selected
-        }
+    // Update the selected products
+    setSelectedProducts(value);
 
-        return newSelected;
-    });
+    // Check if there are no selected products
+    if (value.length === 0) {
+        setErrors({ products: 'Product is required.' });
+    } else {
+        setErrors({}); // Clear error if at least one product is selected
+    }
 };
 
 
@@ -197,7 +197,7 @@ const RoleView = (props) => {
           <Card variant="outlined" sx={{ p: 0 }}>
             <Box sx={{ padding: "15px 30px" }} display="flex" alignItems="center">
               <Box flexGrow={1}>
-                <Typography sx={{ fontSize: "18px", fontWeight: "500" }}>Role Form</Typography>
+                <Typography sx={{ fontSize: "18px", fontWeight: "500" }}>Company Form</Typography>
               </Box>
             </Box>
             <Divider />
@@ -208,36 +208,54 @@ const RoleView = (props) => {
                     <TextField
                       id="name"
                       name="name"
-                      label="Role Name"
+                      label="Company Name"
+                      size="small"
                       variant="outlined"
                       fullWidth
                       onChange={onChange}
-                      value={role.name}
+                      value={company.name}
                       error={Boolean(errors.name)}
                       helperText={errors.name}
                       sx={{ mb: 2 }}
                     />
                   </Grid2>
-                  <Grid2 size={{ xs: 12, md: 12 }}>
-                      <Typography variant="h6">Permissions</Typography>
-                      {permissions.map(permission => (
-                          <FormControlLabel
-                              key={permission.id}
-                              control={
-                                  <Checkbox
-                                      name="permissions[]"
-                                      checked={selectedPermissions.includes(permission.id)}
-                                      onChange={() => handlePermissionChange(permission.id)}
-                                  />
-                              }
-                              label={permission.name}
-                          />
-                      ))}
-                      {errors.permissions && (
-                        <Typography variant="body2" color="error">
-                            {errors.permissions}
-                        </Typography>
-                    )}
+                  <Grid2 size={{ xs: 10, md: 10 }}>
+                  
+                  <FormControl fullWidth error={Boolean(errors.products)}>
+                        <InputLabel id="products_select">Products</InputLabel>
+                        <Select
+                            labelId="products_select"
+                            label="Products"
+                            size="small" 
+                            multiple
+                            value={selectedProducts}
+                            onChange={handleProductChange}
+                            renderValue={(selected) => (
+                                <Box size="small" sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    {selected.map((value) => (
+                                        <Chip size="small" key={value} label={products.find(p => p.id === value)?.name} 
+                                        sx={{
+                                            backgroundColor: 'primary.main',
+                                            color: 'white',
+                                            margin: '2px',
+                                        }} />
+                                    ))}
+                                </Box>
+                            )}
+                            sx={{ height: '56px' }}
+                        >
+                            {products.map(product => (
+                                <MenuItem key={product.id} value={product.id}>
+                                    {product.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                        {errors.products && (
+                            <Typography variant="body2" color="error">
+                                {errors.products}
+                            </Typography>
+                        )}
+                    </FormControl>
                      
                   </Grid2>
                   <Grid2 size={{ xs: 12, md: 12 }}>
@@ -274,7 +292,7 @@ const RoleView = (props) => {
                     />
                   </FormControl>
                 </div>
-                <DataTable value={rolesWithPermissions} paginator rows={10} header="Role Data" globalFilter={globalFilter} sortMode="multiple">
+                <DataTable value={companiesWithProducts} paginator rows={10} header="Company Data" globalFilter={globalFilter} sortMode="multiple">
                   <Column header="Id" body={indexBodyTemplate} style={{ width: '80px' }} />
                   {columns.map((col, index) => (
                     <Column key={index} field={col.field} header={col.header} sortable />
@@ -290,4 +308,4 @@ const RoleView = (props) => {
   );
 };
 
-export default RoleView;
+export default CompanyView;

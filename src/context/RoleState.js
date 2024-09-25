@@ -4,6 +4,7 @@ import { useState } from "react";
 
 const RoleState = (props) => {
   const [roles, setRoles] = useState([]);
+  const [rolesWithPermissions, setRolesWithPermissions] = useState([]);
   const host = "http://localhost:5000";
   // Function to fetch roles (example with API call)
   const getAllRoles = async () =>{
@@ -15,8 +16,18 @@ const RoleState = (props) => {
         }
       });
       const json = await response.json();
-    //   console.log(json);
       setRoles(json);
+  }
+  const getAllRolesWithPermissions = async () =>{
+    const response = await fetch(`${host}/api/roles/fetchallroleswithpermissions`, {
+      method: "GET",
+      headers: {
+        "auth-token":localStorage.getItem('token'),
+        "Content-Type": "application/json",
+      }
+    });
+    const json = await response.json();
+    setRolesWithPermissions(json);
   }
 
   const addRole = async (name, permissions) => {
@@ -39,6 +50,7 @@ const RoleState = (props) => {
     }
     const json = await response.json();
     setRoles(roles.concat(json.role));
+    getAllRolesWithPermissions();
     return json;
   };
   
@@ -53,6 +65,8 @@ const RoleState = (props) => {
     const json = await response.json();
     const newRoles = roles.filter((role)=>{return role.id!==id})
     setRoles(newRoles);
+    getAllRolesWithPermissions();
+
   }
   const updateRole = async (id, name, permissions) =>{
     
@@ -65,19 +79,23 @@ const RoleState = (props) => {
       body: JSON.stringify({ name, permissions }),
     });
     const json = await response.json();
-    let newRoles = JSON.parse(JSON.stringify(roles));
-    for (let index = 0; index < newRoles.length; index++) {
-      const element = newRoles[index];
-      if(element.id == id){
-        newRoles[index].name = name;
-        setRoles(newRoles);
-        break;
+    if(json.success){
+      let newRoles = JSON.parse(JSON.stringify(roles));
+      for (let index = 0; index < newRoles.length; index++) {
+        const element = newRoles[index];
+        if(element.id == id){
+          newRoles[index].name = name;
+          setRoles(newRoles);
+          break;
+        }
       }
+      getAllRolesWithPermissions();
     }
+    return json;
   }
 
   return (
-        <RoleContext.Provider value={{roles, setRoles, getAllRoles, addRole, updateRole, deleteRole }}>
+        <RoleContext.Provider value={{roles, setRoles, rolesWithPermissions, setRolesWithPermissions, getAllRolesWithPermissions, getAllRoles, addRole, updateRole, deleteRole }}>
             {props.children}
         </RoleContext.Provider>
     )

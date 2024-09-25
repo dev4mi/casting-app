@@ -79,6 +79,16 @@ const Menuitems = [
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/productparts",
   },
+  {
+    title: "Companies",
+    icon: AutoAwesomeMosaicOutlinedIcon,
+    href: "/companies",
+  },
+  {
+    title: "Molding",
+    icon: AutoAwesomeMosaicOutlinedIcon,
+    href: "/molding",
+  },
   // {
   //   title: "Login",
   //   icon: AutoAwesomeMosaicOutlinedIcon,

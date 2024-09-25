@@ -1,0 +1,41 @@
+import React from 'react';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+
+const MoldingDetailsTable = ({ moldingDetails }) => {
+    // Function to handle the rendering of parts
+    const renderParts = (parts) => {
+        return parts.map(part => (
+            <div key={part._id}>
+                {part.name} (Quantity: {part.part_quantity})
+            </div>
+        ));
+    };
+
+    return (
+        <div>
+            <DataTable value={moldingDetails} paginator rows={10} dataKey="_id">
+                <Column field="_id" header="ID" />
+                <Column field="molding_unique_number" header="Molding Unique Number" />
+
+                <Column header="Companies" body={rowData => (
+                    <div>
+                        {rowData.companies.map(company => (
+                            <div key={company.company._id}>
+                                <strong>{company.company.name}</strong>
+                                {company.products.map(product => (
+                                    <div key={product._id}>
+                                        <em>{product.name}</em>
+                                        <div>{renderParts(product.parts)}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
+                )} />
+            </DataTable>
+        </div>
+    );
+};
+
+export default MoldingDetailsTable;

@@ -12,6 +12,8 @@ import LoginPage from "./views/Auth/LoginPage";
 import { AlertProvider } from "./context/AlertContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import PermissionState from "./context/PermissionState";
+import CompanyState from "./context/CompanyState";
+import MoldingState from "./context/MoldingState";
 
 const App = () => {
   const navigate = useNavigate();
@@ -40,6 +42,8 @@ const AppWrapper = () => (
       <UserState>
         <PermissionState>
         <RoleState>
+          <MoldingState>
+          <CompanyState>
           <ProductState>
             <PartState>
               <ProductPartsState>
@@ -50,6 +54,8 @@ const AppWrapper = () => (
               </ProductPartsState>
             </PartState>
           </ProductState>
+          </CompanyState>
+          </MoldingState>
         </RoleState>
         </PermissionState>
       </UserState>
