@@ -31,7 +31,7 @@ import { AlertContext } from "../../context/AlertContext";
 import { useNavigate } from 'react-router-dom';
 import PartContext from '../../context/PartContext';
 
-const MoldingView = () => {
+const MoldingRejectionView = () => {
   const navigate = useNavigate();
   const { showAlert } = useContext(AlertContext);
   const { companies, getAllCompanies } = useContext(CompanyContext);
