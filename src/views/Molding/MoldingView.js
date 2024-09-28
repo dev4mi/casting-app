@@ -88,7 +88,9 @@ const MoldingView = () => {
             parts: product.parts.map(part => ({
                 part_id: part.id,
                 part_name: part.name,
-                part_qty: part.part_quantity
+                part_qty: part.part_quantity,
+                rejection_qty: 0,
+
             })) || []
         }))
     );
@@ -160,6 +162,7 @@ const renderParts = (parts) => {
             part_id: pp.part_id,
             part_name: parts.find((p) => p.id === pp.part_id)?.name || "",
             part_qty: pp.part_quantity,
+            rejection_qty: 0,
           })),
         };
       }

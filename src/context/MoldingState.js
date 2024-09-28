@@ -5,9 +5,15 @@ const MoldingState = (props) => {
   const host = "http://localhost:5000";
     const moldingInitial = [];
       const [moldingDetails, setMoldingDetails]= useState(moldingInitial);
+      const [moldingWithProductsDetails, setMoldingWithProductsDetails]= useState(moldingInitial);
   
-      const getAllMoldingData = async () =>{
-        const response = await fetch(`${host}/api/molding/fetchallmoldingdata`, {
+      const getAllMoldingData = async (id = 0) =>{
+        let url=`${host}/api/molding/fetchallmoldingdata`;
+
+        if(id!=0){
+          url=`${host}/api/molding/fetchallmoldingdata?id=`+id;
+        }
+        const response = await fetch(url, {
           method: "GET",
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -17,12 +23,26 @@ const MoldingState = (props) => {
         const json = await response.json();
         let moldingDetails = Array.isArray(json) ? json : [];
         setMoldingDetails(moldingDetails);
-        return moldingDetails;
+        return json;
+       
+      }
+      const getAllMoldingWithProductsData = async () =>{
+        const response = await fetch(`${host}/api/molding/fetchallmoldingwithproducts`, {
+          method: "GET",
+          headers: {
+            "auth-token":localStorage.getItem('token'),
+            "Content-Type": "application/json",
+          }
+        });
+        const json = await response.json();
+        let moldingWithProductsDetails = Array.isArray(json) ? json : [];
+        setMoldingWithProductsDetails(moldingWithProductsDetails);
+        return moldingWithProductsDetails;
        
       }
 
       const getSingleMoldingData = async (id) =>{
-        const response = await fetch(`${host}/api/molding/fetchallmoldingdata?id=${id}`, {
+        const response = await fetch(`${host}/api/molding/fetchspecificmoldingdata/${id}`, {
           method: "GET",
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -132,7 +152,7 @@ const MoldingState = (props) => {
     //     return json;
     //   }   
     return (
-        <MoldingContext.Provider value={{ moldingDetails, setMoldingDetails, getAllMoldingData, getSingleMoldingData, addMoldingData, updateMoldingData, deleteMoldingMappingRecord, deleteMoldingData}}>
+        <MoldingContext.Provider value={{ moldingDetails, moldingWithProductsDetails, setMoldingDetails, getAllMoldingData, getAllMoldingWithProductsData, getSingleMoldingData, addMoldingData, updateMoldingData, deleteMoldingMappingRecord, deleteMoldingData}}>
             {props.children}
         </MoldingContext.Provider>
     )

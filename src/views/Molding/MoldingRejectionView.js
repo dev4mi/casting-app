@@ -41,15 +41,19 @@ const MoldingRejectionView = () => {
   const [errors, setErrors] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(''); // State to hold the search term
+  const [selectedMoldingNumber, setSelectedMoldingNumber] = useState(null); 
   const [selectedMolding, setSelectedMolding] = useState(null); 
   const [records, setRecords] = useState([]);
-  const { moldingDetails, setMoldingDetails, getAllMoldingData, addMoldingData, updateMoldingData, deleteMoldingMappingRecord, deleteMoldingData } = useContext(MoldingContext);
+  const { moldingDetails, setMoldingDetails, getAllMoldingData, moldingWithProductsDetails, getSingleMoldingData, getAllMoldingWithProductsData, addMoldingData, updateMoldingData, deleteMoldingMappingRecord, deleteMoldingData } = useContext(MoldingContext);
 
   useEffect(() => {
     getAllCompanies();
     getAllProducts();
     getAllProductParts();
-    handleAddRecord(); // Automatically add an initial record
+    getAllMoldingWithProductsData();
+    getAllMoldingData();
+    console.log('+++++'+moldingDetails)
+
     const fetchMoldingData = async () => {
       try {
         const res = await getAllMoldingData();
@@ -68,16 +72,16 @@ const MoldingRejectionView = () => {
         <Fab type='button' color="success" size="small" onClick={() => handleEdit(rowData)} style={{ marginRight: '4px' }}>
           <EditIcon />
         </Fab>
-        <Fab type='button' color="error" size="small" onClick={() => handleDelete(rowData)}>
-          <DeleteIcon />
-        </Fab>
+        
       </>
     );
   };
   const handleEdit = (molding) => {
     setErrors({});
     setEditMode(true);
-    setSelectedMolding(molding); // Set the selected molding record
+    // if(molding.length > 0){
+    setSelectedMolding(molding);
+    setSelectedMoldingNumber(molding.molding_id); 
 
     // Populate the form with the selected molding record
     const newRecords = molding.companies.flatMap(company => 
@@ -88,54 +92,21 @@ const MoldingRejectionView = () => {
             parts: product.parts.map(part => ({
                 part_id: part.id,
                 part_name: part.name,
-                part_qty: part.part_quantity
+                part_qty: part.part_quantity,
+                rejection_qty: part.rejection_quantity,
+                final_qty: (part.part_quantity - part.rejection_quantity)
             })) || []
         }))
     );
     setRecords(newRecords);
+  // }
 
     window.scrollTo({
         top: 0,
         behavior: 'smooth',
     });
 };
-
-
-  const handleDelete = (molding) => {
-    confirmDialog({
-      message: 'Are you sure you want to delete this molding data?',
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => deletingMolding(molding),
-      reject: () => console.log('Delete rejected'),
-    });
-  };
-
-  const deletingMolding = async (molding) => {
-    await deleteMoldingData(molding.molding_id);
-    // getAllCompaniesWithProducts();
-    resetForm();
-    showAlert('Molding has been deleted.', 'success');
-  };
-
-// Function to handle the rendering of parts
-const renderParts = (parts) => {
-    return parts.map(part => (
-        <div key={part._id}>
-            {part.name} (Quantity: {part.part_quantity})
-        </div>
-    ));
-};
-  const handleAddRecord = () => {
-    const newRecord = {
-      id: Date.now(), // Temporary ID for new entry
-      company_id: '',
-      product_id: '',
-      parts: [],
-    };
-
-    setRecords([...records, newRecord]);
-  };
+  
 
   const handleCompanyChange = (recordId, event) => {
     const updatedRecords = records.map((record) => {
@@ -145,6 +116,17 @@ const renderParts = (parts) => {
       return record;
     });
     setRecords(updatedRecords);
+  };
+  const handleMoldingChange = (event) => {
+    setSelectedMoldingNumber(event.target.value);
+    console.log('selcted:'+event.target.value);
+    // let molding = getAllMoldingData(event.target.value);
+    const molding = moldingDetails.filter(
+      (pp) => pp.molding_id === parseInt(event.target.value, 10)
+    );
+    
+    console.log("------"+molding[0].molding_unique_number);
+    handleEdit(molding[0]);  
   };
 
   const handleProductChange = (recordId, event) => {
@@ -160,6 +142,8 @@ const renderParts = (parts) => {
             part_id: pp.part_id,
             part_name: parts.find((p) => p.id === pp.part_id)?.name || "",
             part_qty: pp.part_quantity,
+            rejection_qty: pp.rejection_quantity,
+            final_qty: (pp.part_quantity - pp.rejection_quantity)
           })),
         };
       }
@@ -189,33 +173,26 @@ const renderParts = (parts) => {
     });
     setRecords(updatedRecords);
   };
-
-  const handleRemoveRecord = async (record) => {
-    if (editMode) {
-      // If in edit mode, delete from the database
-      try {
-        if(record.company_id != "" && record.product_id != ""){
-          // Assuming deleteMoldingMapping is a function that sends the delete request to your backend
-          await deleteMoldingMappingRecord(selectedMolding.molding_unique_number, record.company_id, record.product_id);
-          // After successful deletion, remove the record locally
-          await setRecords(records.filter((crecord) => crecord.id !== record.id));
-          showAlert('Record deleted successfully.', 'success');
-        }
-        else {
-          // If not in edit mode, just remove the record locally
-          const updatedRecords = records.filter((crecord) => crecord.id !== record.id);
-          await setRecords(updatedRecords);
-        }
-
-      } catch (error) {
-        showAlert('Error deleting record.', 'error');
-        console.error('Error deleting record:', error);
+  const handleRejectionQuantityChange = (recordId, partId, event) => {
+    const updatedRecords = records.map((record) => {
+      if (record.id === recordId) {
+        const updatedParts = record.parts.map((part) => {
+          if (part.part_id === partId) {
+             // Clear individual field error when user changes input
+            setErrors((prev) => {
+              const newErrors = { ...prev };
+              delete newErrors[`part_${recordId}_${partId}_part_rej_qty`];
+              return newErrors;
+            });
+            return { ...part, rejection_qty: event.target.value };
+          }
+          return part;
+        });
+        return { ...record, parts: updatedParts };
       }
-    } else {
-      // If not in edit mode, just remove the record locally
-      const updatedRecords = records.filter((crecord) => crecord.id !== record.id);
-      await setRecords(updatedRecords);
-    }
+      return record;
+    });
+    setRecords(updatedRecords);
   };
 
   const onGlobalFilterChange = (e) => {
@@ -225,16 +202,10 @@ const renderParts = (parts) => {
     setEditMode(false);
     setSelectedMolding(null); // Clear the selected molding
     setErrors({}); // Clear all form errors
-    const newRecord = {
-      id: Date.now(), // Temporary ID for new entry
-      company_id: '',
-      product_id: '',
-      parts: [],
-    };
-    // Clear records array completely instead of adding a new empty record
     
-    await setRecords([]);
-    await setRecords([newRecord]);
+    // Clear records array completely instead of adding a new empty record
+    setSelectedMoldingNumber(null)
+    await setRecords([]); 
     
   };
   
@@ -243,31 +214,19 @@ const renderParts = (parts) => {
     const newErrors = {};
   
     records.forEach((record, index) => {
-      // Validate company selection
-      if (!record.company_id) {
-        newErrors[`company_${index}`] = 'Company is required!';
-        isValid = false;
-      }
-  
-      // Validate product selection
-      if (!record.product_id) {
-        newErrors[`product_${index}`] = 'Product is required!';
-        isValid = false;
-      }
   
       // Validate parts and quantities for each product
       record.parts.forEach((part, partIndex) => {
-        if (!part.part_id) {
-          newErrors[`part_${index}_${partIndex}_part_id`] = 'Part is required!';
-          isValid = false;
-        }
-  
+       
         const quantity = part.part_qty;
-        if (quantity === '' || quantity === null) {
-          newErrors[`part_${index}_${partIndex}_part_qty`] = 'Quantity is required!';
+       
+        const rej_quantity = part.rejection_qty;
+
+        if (rej_quantity === '' || rej_quantity === null) {
+          newErrors[`part_${index}_${partIndex}_part_rej_qty`] = 'Rejection Quantity is required!';
           isValid = false;
-        } else if (quantity <= 0) {
-          newErrors[`part_${index}_${partIndex}_part_qty`] = 'Quantity must be greater than 0!';
+        } else if (rej_quantity < 0 || rej_quantity > quantity) {
+          newErrors[`part_${index}_${partIndex}_part_rej_qty`] = 'Rejection Quantity must be valid!';
           isValid = false;
         }
       });
@@ -281,24 +240,12 @@ const renderParts = (parts) => {
     event.preventDefault();
     try {
       if (validateForm()) {
-        const uniqueCompanies = new Set();
-        const uniqueProducts = new Set();
-        records.forEach((record) => {
-          if (record.company_id) uniqueCompanies.add(record.company_id);
-          if (record.product_id) uniqueProducts.add(record.product_id);
-        });
-        const totalCompanies = uniqueCompanies.size;
-        const totalProducts = uniqueProducts.size;
-
+       
         if (editMode && selectedMolding) {
           // Update the existing molding record
-          await updateMoldingData(selectedMolding.molding_id, totalCompanies, totalProducts, records);
+          await updateMoldingData(selectedMolding.molding_id, 0, 0, records, 'rejection');
           showAlert('Molding updated successfully', 'success');
-        } else {
-          // Add new molding data  
-          await addMoldingData(totalCompanies, totalProducts, records);
-          showAlert('Molding added successfully', 'success');
-        }
+        } 
         resetForm();
         getAllMoldingData();
       }
@@ -354,11 +301,41 @@ const renderParts = (parts) => {
             <Divider />
             <CardContent padding="30px">
               <form encType="multipart/form-data" onSubmit={handleSubmit}>
+              <Box m={2}>
+                <Grid2 size={{ xs: 4, md: 4 }}>
+                  <TextField
+                    fullWidth
+                    id="molding_id"
+                    name="molding_id"
+                    variant="outlined"
+                    select
+                    label="Select Molding Transaction ID"
+                    value={selectedMoldingNumber}
+                    onChange={(e) => handleMoldingChange(e)}
+                    // disabled={!record.company_id} // Disable until a company is selected
+                    // error={Boolean(errors[`product_${index}`])}
+                    // helperText={errors[`product_${index}`]}
+                  >
+                    {moldingWithProductsDetails
+                      // .filter((p) => 
+                      //   (!selectedProducts[record.company_id] || 
+                      //     !selectedProducts[record.company_id].has(p.id)) || 
+                      //   p.id === record.product_id
+                      // )
+                      .map((option) => (
+                        <MenuItem key={option.id} value={option.id}>
+                          {option.molding_unique_number}
+                        </MenuItem>
+                      ))}
+                  </TextField>
+                  </Grid2>
+                  </Box>
                 {records.length > 0 && (
                   <Box mt={2}>
                     {records.map((record, index) => (
                       <Card variant="outlined" key={record.id} sx={{ mb: 2 }}>
                         <CardContent>
+                        
                         <Grid2 container spacing={{ xs: 2, md: 3 }} alignItems="center">
                           <Grid2 size={{ xs: 4, md: 4 }}>
                               <TextField
@@ -372,6 +349,7 @@ const renderParts = (parts) => {
                                 onChange={(e) => handleCompanyChange(record.id, e)}
                                 error={Boolean(errors[`company_${index}`])}
                                 helperText={errors[`company_${index}`]}
+                                disabled
                               >
                                 {companies.map((option) => (
                                   <MenuItem key={option.id} value={option.id}>
@@ -390,7 +368,7 @@ const renderParts = (parts) => {
                                 label="Select Product"
                                 value={record.product_id}
                                 onChange={(e) => handleProductChange(record.id, e)}
-                                disabled={!record.company_id} // Disable until a company is selected
+                                disabled // Disable until a company is selected
                                 error={Boolean(errors[`product_${index}`])}
                                 helperText={errors[`product_${index}`]}
                               >
@@ -408,32 +386,7 @@ const renderParts = (parts) => {
                               </TextField>
                               </Grid2>
                               <Grid2 size={{ xs: 2, md: 2 }}>
-                              <Box>
-                                {records.length > 1 && (
-                                  <Fab 
-                                    type='button' 
-                                    color="error" 
-                                    onClick={() => handleRemoveRecord(record)} 
-                                    size="small"  
-                                  >
-                                    <DeleteIcon />
-                                  </Fab>
-                                )}
-                                {records.length === (index + 1) && (
-                                  <Fab 
-                                    sx={{ml:'5px'}}
-                                    type='button'
-                                    color="success" 
-                                    onClick={ 
-                                      record.company_id && record.product_id ? handleAddRecord : null 
-                                    } 
-                                    size="small"  
-                                    disabled={!record.company_id || !record.product_id} // Disable if company or product is not selected
-                                  >
-                                    <AddIcon />
-                                  </Fab>                              
-                                )}
-                              </Box>
+                            
                             </Grid2>
                           </Grid2>
                           {record.parts.length > 0 && (
@@ -446,12 +399,25 @@ const renderParts = (parts) => {
                                       sx={{ mt: '10px' }}
                                       fullWidth
                                       variant="outlined"
-                                      label="Quantity"
+                                      label="Total Quantity"
                                       type="number"
                                       value={part.part_qty || ''}
                                       onChange={(e) => handleQuantityChange(record.id, part.part_id, e)}
                                       error={Boolean(errors[`part_${index}_${partIndex}_part_qty`])}
                                       helperText={errors[`part_${index}_${partIndex}_part_qty`]}
+                                      disabled
+                                    /><br/>
+                                      <TextField
+                                      sx={{ mt: '10px' }}
+                                      fullWidth
+                                      variant="outlined"
+                                      label="Rejection Quantity"
+                                      type="number"
+                                      value={part.rejection_qty}
+                                      onChange={(e) => handleRejectionQuantityChange(record.id, part.part_id, e)}
+                                      error={Boolean(errors[`part_${index}_${partIndex}_part_rej_qty`])}
+                                      helperText={errors[`part_${index}_${partIndex}_part_rej_qty`]}
+                                      
                                     />
                                   </Grid2>
                                 ))}
@@ -538,7 +504,7 @@ const renderParts = (parts) => {
                                                   <ul>
                                                       {product.parts.map(part => (
                                                           <li key={part._id}>
-                                                              {part.name} (Qty: {part.part_quantity})
+                                                              {part.name} (Qty: {part.part_quantity}),(Rejected Qty: {part.rejection_quantity}),(Final Qty: {part.final_quantity})
                                                           </li>
                                                       ))}
                                                   </ul>
@@ -563,4 +529,4 @@ const renderParts = (parts) => {
   );
 };
 
-export default MoldingView;
+export default MoldingRejectionView;
