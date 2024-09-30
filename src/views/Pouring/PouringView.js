@@ -21,42 +21,42 @@ import { Button as PrimeButton } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Search } from '@mui/icons-material';
-import MoldingContext from '../../context/MoldingContext';
+import PouringContext from '../../context/PouringContext';
 import CompanyContext from '../../context/CompanyContext';
 import ProductPartsContext from '../../context/ProductPartsContext';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'; 
 import { AlertContext } from "../../context/AlertContext";
 import { useNavigate } from 'react-router-dom';
-import PartContext from '../../context/PartContext';
+import ProductContext from '../../context/ProductContext';
 
-const MoldingView = () => {
+const PouringView = () => {
   const btnCancelRef = useRef(null); 
   const navigate = useNavigate();
   const { showAlert } = useContext(AlertContext);
   const { companiesWithProducts, getAllCompaniesWithProducts } = useContext(CompanyContext);
-  const { parts, getAllParts } = useContext(PartContext);
+  const { products, getAllProducts } = useContext(ProductContext);
   const { productParts, getAllProductParts } = useContext(ProductPartsContext);
   const [errors, setErrors] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(''); // State to hold the search term
-  const [selectedMolding, setSelectedMolding] = useState(null); 
+  const [selectedPouring, setSelectedPouring] = useState(null); 
   const [records, setRecords] = useState([]);
-  const { moldingDetails, setMoldingDetails, getAllMoldingData, addMoldingData, updateMoldingData, deleteMoldingMappingRecord, deleteMoldingData } = useContext(MoldingContext);
+  const { pouringDetails, setPouringDetails, getAllPouringData, addPouringData, updatePouringData, deletePouringMappingRecord, deletePouringData } = useContext(PouringContext);
 
   useEffect(() => {
+    getAllProducts();
     getAllCompaniesWithProducts();
-    getAllProductParts();
     handleAddRecord(); // Automatically add an initial record
-    const fetchMoldingData = async () => {
+    const fetchPouringData = async () => {
       try {
-        const res = await getAllMoldingData();
-        setMoldingDetails(res);
+        const res = await getAllPouringData();
+        setPouringDetails(res);
       } catch (error) {
-        console.error("Error fetching molding data:", error);
+        console.error("Error fetching pouring data:", error);
       }
     };
 
-    fetchMoldingData();
+    fetchPouringData();
   }, []);
 
   const actionBodyTemplate = (rowData) => {
@@ -71,24 +71,19 @@ const MoldingView = () => {
       </>
     );
   };
-  const handleEdit = (molding) => {
+  const handleEdit = (pouring) => {
     setErrors({});
     setEditMode(true);
-    setSelectedMolding(molding); // Set the selected molding record
+    setSelectedPouring(pouring); // Set the selected pouring record
 
     // Populate the form with the selected molding record
-    const newRecords = molding.companies.flatMap(company => 
+    const newRecords = pouring.companies.flatMap(company => 
         company.products.map(product => ({
             id: company.company._id,
             company_id: company.company.id,
             product_id: product.id,
-            parts: product.parts.map(part => ({
-                part_id: part.id,
-                part_name: part.name,
-                part_qty: part.part_quantity,
-                rejection_qty: 0,
-
-            })) || []
+            quantity: product.quantity,
+            rejection_qty: 0
         }))
     );
     setRecords(newRecords);
@@ -99,22 +94,21 @@ const MoldingView = () => {
     });
 };
 
-
-  const handleDelete = (molding) => {
+  const handleDelete = (pouring) => {
     confirmDialog({
-      message: 'Are you sure you want to delete this molding data?',
+      message: 'Are you sure you want to delete this pouring data?',
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
-      accept: () => deletingMolding(molding),
+      accept: () => deletingPouring(pouring),
       reject: () => console.log('Delete rejected'),
     });
   };
 
-  const deletingMolding = async (molding) => {
-    await deleteMoldingData(molding.molding_id);
+  const deletingPouring = async (pouring) => {
+    await deletePouringData(pouring.pouring_id);
     // getAllCompaniesWithProducts();
     resetForm();
-    showAlert('Molding has been deleted.', 'success');
+    showAlert('Pouring data has been deleted.', 'success');
   };
 
   const handleAddRecord = () => {
@@ -122,7 +116,6 @@ const MoldingView = () => {
       id: Date.now(), // Temporary ID for new entry
       company_id: '',
       product_id: '',
-      parts: [],
     };
 
     setRecords([...records, newRecord]);
@@ -131,7 +124,7 @@ const MoldingView = () => {
   const handleCompanyChange = (recordId, event) => {
     const updatedRecords = records.map((record) => {
       if (record.id === recordId) {
-        return { ...record, company_id: event.target.value, product_id: '', parts: [] };
+        return { ...record, company_id: event.target.value, product_id: '' };
       }
       return record;
     });
@@ -141,18 +134,13 @@ const MoldingView = () => {
   const handleProductChange = (recordId, event) => {
     const updatedRecords = records.map((record) => {
       if (record.id === recordId) {
-        const relevantParts = productParts.filter(
-          (pp) => pp.product_id === parseInt(event.target.value)
-        );
+        
         return {
           ...record,
           product_id: event.target.value,
-          parts: relevantParts.map((pp) => ({
-            part_id: pp.part_id,
-            part_name: parts.find((p) => p.id === pp.part_id)?.name || "",
-            part_qty: pp.part_quantity,
-            rejection_qty: 0,
-          })),
+          quantity: record.quantity,
+          rejection_qty: 0,
+          product_name: products.find((p) => p.id === record.product_id)?.name || "",
         };
       }
       return record;
@@ -160,22 +148,18 @@ const MoldingView = () => {
     setRecords(updatedRecords);
   };
 
-  const handleQuantityChange = (recordId, partId, event) => {
+  const handleQuantityChange = (recordId, event) => {
     const updatedRecords = records.map((record) => {
       if (record.id === recordId) {
-        const updatedParts = record.parts.map((part) => {
-          if (part.part_id === partId) {
+       
              // Clear individual field error when user changes input
             setErrors((prev) => {
               const newErrors = { ...prev };
-              delete newErrors[`part_${recordId}_${partId}`];
+              delete newErrors[`product_${recordId}_quantity`];
               return newErrors;
             });
-            return { ...part, part_qty: event.target.value };
-          }
-          return part;
-        });
-        return { ...record, parts: updatedParts };
+           
+        return { ...record, quantity: event.target.value };
       }
       return record;
     });
@@ -187,8 +171,8 @@ const MoldingView = () => {
       // If in edit mode, delete from the database
       try {
         if(record.company_id != "" && record.product_id != ""){
-          // Assuming deleteMoldingMapping is a function that sends the delete request to your backend
-          await deleteMoldingMappingRecord(selectedMolding.molding_unique_number, record.company_id, record.product_id);
+          // Assuming deletePouringMapping is a function that sends the delete request to your backend
+          await deletePouringMappingRecord(selectedPouring.heat_number, record.company_id, record.product_id);
           // After successful deletion, remove the record locally
           await setRecords(records.filter((crecord) => crecord.id !== record.id));
           showAlert('Record deleted successfully.', 'success');
@@ -213,20 +197,20 @@ const MoldingView = () => {
   const onGlobalFilterChange = (e) => {
     setGlobalFilter(e.target.value);
   };
+
   const triggerButtonClick = () => {
     if (btnCancelRef.current) {
-      btnCancelRef.current.click(); // Trigger the click event
+      btnCancelRef.current.click(); 
     }
   };
   const resetForm = async () => {
     setEditMode(false);
-    setSelectedMolding(null); // Clear the selected molding
+    setSelectedPouring(null); // Clear the selected pouring
     setErrors({}); // Clear all form errors
     const newRecord = {
       id: Date.now(), // Temporary ID for new entry
       company_id: '',
       product_id: '',
-      parts: [],
     };
     // Clear records array completely instead of adding a new empty record
     
@@ -251,23 +235,15 @@ const MoldingView = () => {
         newErrors[`product_${index}`] = 'Product is required!';
         isValid = false;
       }
-  
-      // Validate parts and quantities for each product
-      record.parts.forEach((part, partIndex) => {
-        if (!part.part_id) {
-          newErrors[`part_${index}_${partIndex}_part_id`] = 'Part is required!';
-          isValid = false;
-        }
-  
-        const quantity = part.part_qty;
-        if (quantity === '' || quantity === null) {
-          newErrors[`part_${index}_${partIndex}_part_qty`] = 'Quantity is required!';
-          isValid = false;
-        } else if (quantity <= 0) {
-          newErrors[`part_${index}_${partIndex}_part_qty`] = 'Quantity must be greater than 0!';
-          isValid = false;
-        }
-      });
+      const quantity = record.quantity;
+      if (quantity === '' || quantity === null) {
+        newErrors[`product_${index}_quantity`] = 'Quantity is required!';
+        isValid = false;
+      } else if (quantity <= 0) {
+        newErrors[`product_${index}_quantity`] = 'Quantity must be greater than 0!';
+        isValid = false;
+      }
+    
     });
   
     setErrors(newErrors);
@@ -287,20 +263,20 @@ const MoldingView = () => {
         const totalCompanies = uniqueCompanies.size;
         const totalProducts = uniqueProducts.size;
 
-        if (editMode && selectedMolding) {
-          // Update the existing molding record
-          await updateMoldingData(selectedMolding.molding_id, totalCompanies, totalProducts, records);
+        if (editMode && selectedPouring) {
+          // Update the existing pouring record
+          await updatePouringData(selectedPouring.pouring_id, totalCompanies, totalProducts, records);
           triggerButtonClick();
-          showAlert('Molding updated successfully', 'success');
+          showAlert('Pouring data updated successfully', 'success');
 
         } else {
-          // Add new molding data  
-          await addMoldingData(totalCompanies, totalProducts, records);
+          // Add new pouring data  
+          await addPouringData(totalCompanies, totalProducts, records);
           triggerButtonClick();
-          showAlert('Molding added successfully', 'success');
+          showAlert('Pouring data added successfully', 'success');
         }
         
-        getAllMoldingData();
+        getAllPouringData();
         // await resetForm();
       }
       } catch (error) {
@@ -348,7 +324,7 @@ const MoldingView = () => {
             <Box padding="15px 30px" display="flex" alignItems="center">
               <Box flexGrow={3}>
                 <Typography fontSize="18px" fontWeight="500">
-                  {editMode ? `Edit Molding Data - ${selectedMolding.molding_unique_number}` : 'Molding Form'}
+                  {editMode ? `Edit Pouring Data - ${selectedPouring.heat_number}` : 'Pouring Form'}
                 </Typography>
               </Box>
             </Box>
@@ -361,7 +337,7 @@ const MoldingView = () => {
                       <Card variant="outlined" key={record.id} sx={{ mb: 2 }}>
                         <CardContent>
                         <Grid2 container spacing={{ xs: 2, md: 3 }} alignItems="center">
-                          <Grid2 size={{ xs: 4, md: 4 }}>
+                          <Grid2 size={{ xs: 3, md: 3 }}>
                               <TextField
                                 fullWidth
                                 id="company_id"
@@ -381,7 +357,7 @@ const MoldingView = () => {
                                 ))}
                               </TextField>
                             </Grid2>
-                            <Grid2 size={{ xs: 4, md: 4 }}>
+                            <Grid2 size={{ xs: 3, md: 3 }}>
                               <TextField
                                 fullWidth
                                 id="product_id"
@@ -395,23 +371,37 @@ const MoldingView = () => {
                                 error={Boolean(errors[`product_${index}`])}
                                 helperText={errors[`product_${index}`]}
                               >
-                                 
-                               {companiesWithProducts
-                                .find((company) => company.id === record.company_id) // Find the selected company
-                                ?.products
-                                .filter((p) => 
-                                  (!selectedProducts[record.company_id] ||  // If selected products don't exist for this company, show the product
-                                  !selectedProducts[record.company_id].has(p.id)) ||  // If product is not already selected, show the product
-                                  p.id === record.product_id  // Always show the currently selected product even if it's already selected elsewhere
-                                )
-                                .map((option) => ( // Map over filtered products
-                                  <MenuItem key={option.id} value={option.id}>
-                                    {option.name}
-                                  </MenuItem>
-                                ))}
-
+                                 {companiesWithProducts
+                                    .find((company) => company.id === record.company_id) // Find the selected company
+                                    ?.products
+                                    .filter((p) => 
+                                    (!selectedProducts[record.company_id] ||  // If selected products don't exist for this company, show the product
+                                    !selectedProducts[record.company_id].has(p.id)) ||  // If product is not already selected, show the product
+                                    p.id === record.product_id  // Always show the currently selected product even if it's already selected elsewhere
+                                    )
+                                    .map((option) => ( // Map over filtered products
+                                    <MenuItem key={option.id} value={option.id}>
+                                        {option.name}
+                                    </MenuItem>
+                                    ))}
                               </TextField>
                             </Grid2>
+                                
+                            <Grid2 size={{ xs: 3, md: 3 }}>
+                            {/* <Typography>{record.product_name}</Typography> */}
+                            <TextField
+                                // sx={{ mt: '10px' }}
+                                fullWidth
+                                variant="outlined"
+                                label="Quantity"
+                                type="number"
+                                value={record.quantity || ''}
+                                onChange={(e) => handleQuantityChange(record.id, e)}
+                                error={Boolean(errors[`product_${index}_quantity`])}
+                                helperText={errors[`product_${index}_quantity`]}
+                            />
+                            </Grid2>
+  
                               <Grid2 size={{ xs: 2, md: 2 }}>
                               <Box>
                                 {records.length > 1 && (
@@ -441,28 +431,6 @@ const MoldingView = () => {
                               </Box>
                             </Grid2>
                           </Grid2>
-                          {record.parts.length > 0 && (
-                            <Box mt={2}>
-                               <Grid2 container spacing={{ xs: 2, md: 3 }} alignItems="center">
-                                {record.parts.map((part, partIndex) => (
-                                  <Grid2 size={{ xs: 4, md: 4 }} key={part.part_id}>
-                                    <Typography>{part.part_name}</Typography>
-                                    <TextField
-                                      sx={{ mt: '10px' }}
-                                      fullWidth
-                                      variant="outlined"
-                                      label="Quantity"
-                                      type="number"
-                                      value={part.part_qty || ''}
-                                      onChange={(e) => handleQuantityChange(record.id, part.part_id, e)}
-                                      error={Boolean(errors[`part_${index}_${partIndex}_part_qty`])}
-                                      helperText={errors[`part_${index}_${partIndex}_part_qty`]}
-                                    />
-                                  </Grid2>
-                                ))}
-                              </Grid2>
-                            </Box>
-                          )}
                           
                         </CardContent>
                       </Card>
@@ -506,11 +474,11 @@ const MoldingView = () => {
                   </FormControl>
                 </div>
             
-                <DataTable value={moldingDetails} paginator rows={10} header="Molding Data" globalFilter={globalFilter} sortMode="multiple">
+                <DataTable value={pouringDetails} paginator rows={10} header="Pouring Data" globalFilter={globalFilter} sortMode="multiple">
                     <Column field="_id" header="ID" />
-                    <Column field="molding_unique_number" header="Molding Unique Number" />
+                    <Column field="heat_number" header="Pouring Heat Number" />
 
-                   {/* Main Table for Company, Product, and Parts */}
+                   {/* Main Table for Company, Product */}
                     <Column header="Details" body={rowData => (
                         <div>
                           {/* Table for displaying Company, Product, and Parts */}
@@ -519,7 +487,7 @@ const MoldingView = () => {
                                   <tr>
                                       <th style={headerStyle}>Company</th>
                                       <th style={headerStyle}>Product</th>
-                                      <th style={headerStyle}>Parts</th>
+                                      <th style={headerStyle}>Quantity</th>
                                   </tr>
                               </thead>
                               <tbody>
@@ -537,17 +505,11 @@ const MoldingView = () => {
                                               <td style={cellStyle}>
                                                   <em>{product.name}</em>
                                               </td>
-                                              
-                                              {/* Display list of parts */}
-                                              <td style={cellStyle}>
-                                                  <ul>
-                                                      {product.parts.map(part => (
-                                                          <li key={part._id}>
-                                                              {part.name} (Qty: {part.part_quantity})
-                                                          </li>
-                                                      ))}
-                                                  </ul>
+                                               {/* Display product name */}
+                                               <td style={cellStyle}>
+                                                  <em>{product.quantity}</em>
                                               </td>
+                            
                                           </tr>
                                       ))
                                   ))}
@@ -568,4 +530,4 @@ const MoldingView = () => {
   );
 };
 
-export default MoldingView;
+export default PouringView;

@@ -14,6 +14,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import PermissionState from "./context/PermissionState";
 import CompanyState from "./context/CompanyState";
 import MoldingState from "./context/MoldingState";
+import PouringState from "./context/PouringState";
 
 const App = () => {
   const navigate = useNavigate();
@@ -43,6 +44,7 @@ const AppWrapper = () => (
         <PermissionState>
         <RoleState>
           <MoldingState>
+          <PouringState>
           <CompanyState>
           <ProductState>
             <PartState>
@@ -55,6 +57,7 @@ const AppWrapper = () => (
             </PartState>
           </ProductState>
           </CompanyState>
+          </PouringState>
           </MoldingState>
         </RoleState>
         </PermissionState>

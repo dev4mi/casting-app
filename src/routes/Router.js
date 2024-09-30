@@ -30,6 +30,7 @@ const ProductPartsLayouts = lazy(() => import("../views/ProductParts/ProductPart
 const CompaniesLayouts = lazy(() => import("../views/Companies/CompanyView.js"));
 const MoldLayouts = lazy(() => import("../views/Molding/MoldingView.js"));
 const MoldRejectLayouts = lazy(() => import("../views/Molding/MoldingRejectionView.js"));
+const PourLayouts = lazy(() => import("../views/Pouring/PouringView.js"));
 
 const LoginLayouts = lazy(() => import("../views/Auth/LoginPage.js"));
 
@@ -58,6 +59,8 @@ const ThemeRoutes = [
       { path: "/companies", exact:true, element: <CompaniesLayouts /> },
       { path: "/molding", exact:true, element: <MoldLayouts /> },
       { path: "/molding-rejection", exact:true, element: <MoldRejectLayouts /> },
+      { path: "/pouring", exact:true, element: <PourLayouts /> },
+
      
     ],
   },

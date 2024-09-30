@@ -108,18 +108,9 @@ const MoldingRejectionView = () => {
 };
   
 
-  const handleCompanyChange = (recordId, event) => {
-    const updatedRecords = records.map((record) => {
-      if (record.id === recordId) {
-        return { ...record, company_id: event.target.value, product_id: '', parts: [] };
-      }
-      return record;
-    });
-    setRecords(updatedRecords);
-  };
   const handleMoldingChange = (event) => {
     setSelectedMoldingNumber(event.target.value);
-    console.log('selcted:'+event.target.value);
+    console.log('selected:'+event.target.value);
     // let molding = getAllMoldingData(event.target.value);
     const molding = moldingDetails.filter(
       (pp) => pp.molding_id === parseInt(event.target.value, 10)
@@ -129,50 +120,6 @@ const MoldingRejectionView = () => {
     handleEdit(molding[0]);  
   };
 
-  const handleProductChange = (recordId, event) => {
-    const updatedRecords = records.map((record) => {
-      if (record.id === recordId) {
-        const relevantParts = productParts.filter(
-          (pp) => pp.product_id === parseInt(event.target.value)
-        );
-        return {
-          ...record,
-          product_id: event.target.value,
-          parts: relevantParts.map((pp) => ({
-            part_id: pp.part_id,
-            part_name: parts.find((p) => p.id === pp.part_id)?.name || "",
-            part_qty: pp.part_quantity,
-            rejection_qty: pp.rejection_quantity,
-            final_qty: (pp.part_quantity - pp.rejection_quantity)
-          })),
-        };
-      }
-      return record;
-    });
-    setRecords(updatedRecords);
-  };
-
-  const handleQuantityChange = (recordId, partId, event) => {
-    const updatedRecords = records.map((record) => {
-      if (record.id === recordId) {
-        const updatedParts = record.parts.map((part) => {
-          if (part.part_id === partId) {
-             // Clear individual field error when user changes input
-            setErrors((prev) => {
-              const newErrors = { ...prev };
-              delete newErrors[`part_${recordId}_${partId}`];
-              return newErrors;
-            });
-            return { ...part, part_qty: event.target.value };
-          }
-          return part;
-        });
-        return { ...record, parts: updatedParts };
-      }
-      return record;
-    });
-    setRecords(updatedRecords);
-  };
   const handleRejectionQuantityChange = (recordId, partId, event) => {
     const updatedRecords = records.map((record) => {
       if (record.id === recordId) {
@@ -346,9 +293,9 @@ const MoldingRejectionView = () => {
                                 select
                                 label="Select Company"
                                 value={record.company_id}
-                                onChange={(e) => handleCompanyChange(record.id, e)}
-                                error={Boolean(errors[`company_${index}`])}
-                                helperText={errors[`company_${index}`]}
+                                // onChange={(e) => handleCompanyChange(record.id, e)}
+                                // error={Boolean(errors[`company_${index}`])}
+                                // helperText={errors[`company_${index}`]}
                                 disabled
                               >
                                 {companies.map((option) => (
@@ -367,10 +314,10 @@ const MoldingRejectionView = () => {
                                 select
                                 label="Select Product"
                                 value={record.product_id}
-                                onChange={(e) => handleProductChange(record.id, e)}
+                                // onChange={(e) => handleProductChange(record.id, e)}
                                 disabled // Disable until a company is selected
-                                error={Boolean(errors[`product_${index}`])}
-                                helperText={errors[`product_${index}`]}
+                                // error={Boolean(errors[`product_${index}`])}
+                                // helperText={errors[`product_${index}`]}
                               >
                                 {products
                                   .filter((p) => 
@@ -402,9 +349,9 @@ const MoldingRejectionView = () => {
                                       label="Total Quantity"
                                       type="number"
                                       value={part.part_qty || ''}
-                                      onChange={(e) => handleQuantityChange(record.id, part.part_id, e)}
-                                      error={Boolean(errors[`part_${index}_${partIndex}_part_qty`])}
-                                      helperText={errors[`part_${index}_${partIndex}_part_qty`]}
+                                      // onChange={(e) => handleQuantityChange(record.id, part.part_id, e)}
+                                      // error={Boolean(errors[`part_${index}_${partIndex}_part_qty`])}
+                                      // helperText={errors[`part_${index}_${partIndex}_part_qty`]}
                                       disabled
                                     /><br/>
                                       <TextField

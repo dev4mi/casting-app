@@ -94,6 +94,11 @@ const Menuitems = [
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/molding-rejection",
   },
+  {
+    title: "Pouring",
+    icon: AutoAwesomeMosaicOutlinedIcon,
+    href: "/pouring",
+  },
   // {
   //   title: "Login",
   //   icon: AutoAwesomeMosaicOutlinedIcon,
