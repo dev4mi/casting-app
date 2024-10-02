@@ -1,17 +1,17 @@
 import React from "react";
-import PouringContext from "./PouringContext";
+import DispatchContext from "./DispatchContext";
 import { useState } from "react";
-const PouringState = (props) => {
+const DispatchState = (props) => {
   const host = "http://localhost:5000";
-    const pouringInitial = [];
-      const [pouringDetails, setPouringDetails]= useState(pouringInitial);
-      const [pouringWithProductsDetails, setPouringWithProductsDetails]= useState(pouringInitial);
+    const dispatchInitial = [];
+      const [dispatchDetails, setDispatchDetails]= useState(dispatchInitial);
+      const [dispatchWithProductsDetails, setDispatchWithProductsDetails]= useState(dispatchInitial);
   
-      const getAllPouringData = async (id = 0) =>{
-        let url=`${host}/api/pouring/fetchallpouringdata`;
+      const getAllDispatchData = async (id = 0) =>{
+        let url=`${host}/api/dispatch/fetchalldispatchdata`;
 
         if(id!=0){
-          url=`${host}/api/pouring/fetchallpouringdata?id=`+id;
+          url=`${host}/api/dispatch/fetchalldispatchdata?id=`+id;
         }
         const response = await fetch(url, {
           method: "GET",
@@ -21,13 +21,13 @@ const PouringState = (props) => {
           }
         });
         const json = await response.json();
-        let pouringDetails = Array.isArray(json) ? json : [];
-        setPouringDetails(pouringDetails);
+        let dispatchDetails = Array.isArray(json) ? json : [];
+        setDispatchDetails(dispatchDetails);
         return json;
        
       }
-      const getAllPouringWithProductsData = async () =>{
-        const response = await fetch(`${host}/api/pouring/fetchallpouringwithproducts`, {
+      const getAllDispatchWithProductsData = async () =>{
+        const response = await fetch(`${host}/api/dispatch/fetchalldispatchwithproducts`, {
           method: "GET",
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -35,14 +35,14 @@ const PouringState = (props) => {
           }
         });
         const json = await response.json();
-        let pouringWithProductsDetails = Array.isArray(json) ? json : [];
-        setPouringWithProductsDetails(pouringWithProductsDetails);
-        return pouringWithProductsDetails;
+        let dispatchWithProductsDetails = Array.isArray(json) ? json : [];
+        setDispatchWithProductsDetails(dispatchWithProductsDetails);
+        return dispatchWithProductsDetails;
        
       }
 
-      const getSinglePouringData = async (id) =>{
-        const response = await fetch(`${host}/api/pouring/fetchspecificpouringdata/${id}`, {
+      const getSingleDispatchData = async (id) =>{
+        const response = await fetch(`${host}/api/dispatch/fetchspecificdispatchdata/${id}`, {
           method: "GET",
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -50,14 +50,14 @@ const PouringState = (props) => {
           }
         });
         const json = await response.json();
-        let pouringDetails = Array.isArray(json) ? json : [];
-        // setPouringDetails(pouringDetails);
-        return pouringDetails;
+        let dispatchDetails = Array.isArray(json) ? json : [];
+        // setDispatchDetails(dispatchDetails);
+        return dispatchDetails;
       }
       
-      const addPouringData = async (totalCompanies, totalProducts, records) => {
+      const addDispatchData = async (totalCompanies, totalProducts, records) => {
         
-        const response = await fetch(`${host}/api/pouring/addpouringdata`, {
+        const response = await fetch(`${host}/api/dispatch/adddispatchdata`, {
           method: 'POST',
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -74,13 +74,13 @@ const PouringState = (props) => {
       
         }
         const json = await response.json();
-        getAllPouringData();
+        getAllDispatchData();
         return json;
       };
 
-      const updatePouringData = async (id, totalCompanies, totalProducts, records) => {
+      const updateDispatchData = async (id, totalCompanies, totalProducts, records) => {
         
-        const response = await fetch(`${host}/api/pouring/updatepouringdata/${id}`, {
+        const response = await fetch(`${host}/api/dispatch/updatedispatchdata/${id}`, {
           method: 'POST',
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -97,12 +97,12 @@ const PouringState = (props) => {
       
         }
         const json = await response.json();
-        getAllPouringData();
+        getAllDispatchData();
         return json;
       };
       
-      const deletePouringMappingRecord = async (details_id, totalCompanies, totalProducts) =>{
-        const response = await fetch(`${host}/api/pouring/deletepouringmapping`, {
+      const deleteDispatchMappingRecord = async (details_id, totalCompanies, totalProducts) =>{
+        const response = await fetch(`${host}/api/dispatch/deletedispatchmapping`, {
           method: "DELETE",
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -111,11 +111,11 @@ const PouringState = (props) => {
           body: JSON.stringify({ details_id, totalCompanies, totalProducts })
         });
         const json = await response.json();
-        getAllPouringData();
+        getAllDispatchData();
       }
 
-      const deletePouringData = async (id) =>{
-        const response = await fetch(`${host}/api/pouring/deletepouringdata/${id}`, {
+      const deleteDispatchData = async (id) =>{
+        const response = await fetch(`${host}/api/dispatch/deletedispatchdata/${id}`, {
           method: "DELETE",
           headers: {
             "auth-token":localStorage.getItem('token'),
@@ -123,13 +123,13 @@ const PouringState = (props) => {
           },
         });
         const json = await response.json();
-        getAllPouringData();        
+        getAllDispatchData();        
       }
 
     return (
-        <PouringContext.Provider value={{ pouringDetails, pouringWithProductsDetails, setPouringDetails, getAllPouringData, getAllPouringWithProductsData, getSinglePouringData, addPouringData, updatePouringData, deletePouringMappingRecord, deletePouringData}}>
+        <DispatchContext.Provider value={{ dispatchDetails, dispatchWithProductsDetails, setDispatchDetails, getAllDispatchData, getAllDispatchWithProductsData, getSingleDispatchData, addDispatchData, updateDispatchData, deleteDispatchMappingRecord, deleteDispatchData}}>
             {props.children}
-        </PouringContext.Provider>
+        </DispatchContext.Provider>
     )
 }
-export default PouringState;
+export default DispatchState;

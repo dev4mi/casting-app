@@ -101,14 +101,14 @@ const MoldingState = (props) => {
         return json;
       };
       
-      const deleteMoldingMappingRecord = async (unique_number, company_id, product_id) =>{
+      const deleteMoldingMappingRecord = async (unique_number, company_id, product_id, total_companies, total_products) =>{
         const response = await fetch(`${host}/api/molding/deletemoldingmapping`, {
           method: "DELETE",
           headers: {
             "auth-token":localStorage.getItem('token'),
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ unique_number, company_id, product_id })
+          body: JSON.stringify({ unique_number, company_id, product_id, total_companies, total_products })
         });
         const json = await response.json();
         getAllMoldingData();

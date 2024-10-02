@@ -15,6 +15,7 @@ import PermissionState from "./context/PermissionState";
 import CompanyState from "./context/CompanyState";
 import MoldingState from "./context/MoldingState";
 import PouringState from "./context/PouringState";
+import DispatchState from "./context/DispatchState";
 
 const App = () => {
   const navigate = useNavigate();
@@ -45,18 +46,20 @@ const AppWrapper = () => (
         <RoleState>
           <MoldingState>
           <PouringState>
-          <CompanyState>
-          <ProductState>
-            <PartState>
-              <ProductPartsState>
-                <Routes>
-                  <Route exact path="/login" element={<LoginPage />} />
-                  <Route path="/*" element={<App />} />
-                </Routes>
-              </ProductPartsState>
-            </PartState>
-          </ProductState>
-          </CompanyState>
+            <DispatchState>
+              <CompanyState>
+              <ProductState>
+                <PartState>
+                  <ProductPartsState>
+                    <Routes>
+                      <Route exact path="/login" element={<LoginPage />} />
+                      <Route path="/*" element={<App />} />
+                    </Routes>
+                  </ProductPartsState>
+                </PartState>
+              </ProductState>
+              </CompanyState>
+              </DispatchState>
           </PouringState>
           </MoldingState>
         </RoleState>

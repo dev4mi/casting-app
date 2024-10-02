@@ -99,6 +99,21 @@ const Menuitems = [
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/pouring",
   },
+  {
+    title: "Pouring Rejection",
+    icon: AutoAwesomeMosaicOutlinedIcon,
+    href: "/pouring-rejection",
+  },
+  {
+    title: "Dispatch",
+    icon: AutoAwesomeMosaicOutlinedIcon,
+    href: "/dispatch",
+  },
+  {
+    title: "Dispatch Rejection",
+    icon: AutoAwesomeMosaicOutlinedIcon,
+    href: "/dispatch-rejection",
+  },
   // {
   //   title: "Login",
   //   icon: AutoAwesomeMosaicOutlinedIcon,

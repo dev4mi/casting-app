@@ -21,42 +21,40 @@ import { Button as PrimeButton } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Search } from '@mui/icons-material';
-import PouringContext from '../../context/PouringContext';
+import DispatchContext from '../../context/DispatchContext';
 import CompanyContext from '../../context/CompanyContext';
-import ProductPartsContext from '../../context/ProductPartsContext';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'; 
 import { AlertContext } from "../../context/AlertContext";
 import { useNavigate } from 'react-router-dom';
 import ProductContext from '../../context/ProductContext';
 
-const PouringView = () => {
+const DispatchView = () => {
   const btnCancelRef = useRef(null); 
   const navigate = useNavigate();
   const { showAlert } = useContext(AlertContext);
   const { companiesWithProducts, getAllCompaniesWithProducts } = useContext(CompanyContext);
   const { products, getAllProducts } = useContext(ProductContext);
-  const { productParts, getAllProductParts } = useContext(ProductPartsContext);
   const [errors, setErrors] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(''); // State to hold the search term
-  const [selectedPouring, setSelectedPouring] = useState(null); 
+  const [selectedDispatch, setSelectedDispatch] = useState(null); 
   const [records, setRecords] = useState([]);
-  const { pouringDetails, setPouringDetails, getAllPouringData, addPouringData, updatePouringData, deletePouringMappingRecord, deletePouringData } = useContext(PouringContext);
+  const { dispatchDetails, setDispatchDetails, getAllDispatchData, addDispatchData, updateDispatchData, deleteDispatchMappingRecord, deleteDispatchData } = useContext(DispatchContext);
 
   useEffect(() => {
     getAllProducts();
     getAllCompaniesWithProducts();
     handleAddRecord(); // Automatically add an initial record
-    const fetchPouringData = async () => {
+    const fetchDispatchData = async () => {
       try {
-        const res = await getAllPouringData();
-        setPouringDetails(res);
+        const res = await getAllDispatchData();
+        setDispatchDetails(res);
       } catch (error) {
-        console.error("Error fetching pouring data:", error);
+        console.error("Error fetching Dispatch data:", error);
       }
     };
 
-    fetchPouringData();
+    fetchDispatchData();
   }, []);
 
   const actionBodyTemplate = (rowData) => {
@@ -71,16 +69,16 @@ const PouringView = () => {
       </>
     );
   };
-  const handleEdit = (pouring) => {
+  const handleEdit = (dispatch) => {
     setErrors({});
     setEditMode(true);
-    setSelectedPouring(pouring); // Set the selected pouring record
+    setSelectedDispatch(dispatch); // Set the selected dispatch record
 
     // Populate the form with the selected molding record
-    const newRecords = pouring.companies.flatMap(company => 
+    const newRecords = dispatch.companies.flatMap(company => 
         company.products.map(product => ({
             id: company.company._id,
-            detail_id: product.pouring_details_id,
+            detail_id: product.dispatch_details_id,
             company_id: company.company.id,
             product_id: product.id,
             quantity: product.quantity,
@@ -94,22 +92,22 @@ const PouringView = () => {
     });
 };
 
-  const handleDelete = (pouring) => {
+  const handleDelete = (dispatch) => {
     confirmDialog({
-      message: 'Are you sure you want to delete this pouring data?',
+      message: 'Are you sure you want to delete this dispatch data?',
       header: 'Confirmation',
       icon: 'pi pi-exclamation-triangle',
-      accept: () => deletingPouring(pouring),
+      accept: () => deletingDispatch(dispatch),
       reject: () => console.log('Delete rejected'),
     });
   };
 
-  const deletingPouring = async (pouring) => {
+  const deletingDispatch = async (dispatch) => {
       
-    await deletePouringData(pouring.pouring_id);
+    await deleteDispatchData(dispatch.dispatch_id);
     // getAllCompaniesWithProducts();
     resetForm();
-    showAlert('Pouring data has been deleted.', 'success');
+    showAlert('Dispatch data has been deleted.', 'success');
   };
 
   const handleAddRecord = () => {
@@ -188,8 +186,8 @@ const PouringView = () => {
           const totalCompanies = uniqueCompanies.size;
           const totalProducts = uniqueProducts.size;
   
-          // Assuming deletePouringMapping is a function that sends the delete request to your backend
-          await deletePouringMappingRecord(detail_id, totalCompanies, totalProducts);
+          // Assuming deleteDispatchMapping is a function that sends the delete request to your backend
+          await deleteDispatchMappingRecord(detail_id, totalCompanies, totalProducts);
   
           // Show success alert after successful deletion
           showAlert('Record deleted successfully.', 'success');
@@ -222,7 +220,7 @@ const PouringView = () => {
   };
   const resetForm = async () => {
     setEditMode(false);
-    setSelectedPouring(null); // Clear the selected pouring
+    setSelectedDispatch(null); // Clear the selected Dispatch
     setErrors({}); // Clear all form errors
     const newRecord = {
       id: Date.now(), // Temporary ID for new entry
@@ -265,7 +263,6 @@ const PouringView = () => {
         newErrors[`product_${index}_quantity`] = 'Quantity must be greater than rejection quantity!';
         isValid = false;
       }
-    
     });
   
     setErrors(newErrors);
@@ -285,20 +282,20 @@ const PouringView = () => {
         const totalCompanies = uniqueCompanies.size;
         const totalProducts = uniqueProducts.size;
 
-        if (editMode && selectedPouring) {
-          // Update the existing pouring record
-          await updatePouringData(selectedPouring.pouring_id, totalCompanies, totalProducts, records);
+        if (editMode && selectedDispatch) {
+          // Update the existing Dispatch record
+          await updateDispatchData(selectedDispatch.dispatch_id, totalCompanies, totalProducts, records);
           triggerButtonClick();
-          showAlert('Pouring data updated successfully', 'success');
+          showAlert('Dispatch data updated successfully', 'success');
 
         } else {
-          // Add new pouring data  
-          await addPouringData(totalCompanies, totalProducts, records);
+          // Add new Dispatch data  
+          await addDispatchData(totalCompanies, totalProducts, records);
           triggerButtonClick();
-          showAlert('Pouring data added successfully', 'success');
+          showAlert('Dispatch data added successfully', 'success');
         }
         
-        getAllPouringData();
+        getAllDispatchData();
         // await resetForm();
       }
       } catch (error) {
@@ -346,7 +343,7 @@ const PouringView = () => {
             <Box padding="15px 30px" display="flex" alignItems="center">
               <Box flexGrow={3}>
                 <Typography fontSize="18px" fontWeight="500">
-                  {editMode ? `Edit Pouring Data - ${selectedPouring.heat_number}` : 'Pouring Form'}
+                  {editMode ? `Edit Dispatch Data - ${selectedDispatch.dispatch_unique_number}` : 'Dispatch Form'}
                 </Typography>
               </Box>
             </Box>
@@ -366,8 +363,8 @@ const PouringView = () => {
                                 fullWidth
                                 id="company_id"
                                 name="company_id"
-                                variant="outlined"
-                                value={record.company_id || ''}
+                                variant="outlined"                               
+                                value={record.company_id}
                                 onChange={(e) => handleCompanyChange(record.id, e)}
                                 error={Boolean(errors[`company_${index}`])}
                                 helperText={errors[`company_${index}`]}
@@ -387,7 +384,7 @@ const PouringView = () => {
                                 id="product_id"
                                 name="product_id"
                                 variant="outlined"
-                                value={record.product_id || ''}
+                                value={record.product_id}
                                 onChange={(e) => handleProductChange(record.id, e)}
                                 disabled={!record.company_id} // Disable until a company is selected
                                 error={Boolean(errors[`product_${index}`])}
@@ -496,9 +493,9 @@ const PouringView = () => {
                   </FormControl>
                 </div>
             
-                <DataTable value={pouringDetails} paginator rows={10} header="Pouring Data" globalFilter={globalFilter} sortMode="multiple">
+                <DataTable value={dispatchDetails} paginator rows={10} header="Dispatch Data" globalFilter={globalFilter} sortMode="multiple">
                     <Column field="_id" header="ID" />
-                    <Column field="heat_number" header="Pouring Heat Number" />
+                    <Column field="dispatch_unique_number" header="Dispatch Unique Number" />
 
                    {/* Main Table for Company, Product */}
                     <Column header="Details" body={rowData => (
@@ -552,4 +549,4 @@ const PouringView = () => {
   );
 };
 
-export default PouringView;
+export default DispatchView;

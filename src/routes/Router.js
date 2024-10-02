@@ -31,6 +31,9 @@ const CompaniesLayouts = lazy(() => import("../views/Companies/CompanyView.js"))
 const MoldLayouts = lazy(() => import("../views/Molding/MoldingView.js"));
 const MoldRejectLayouts = lazy(() => import("../views/Molding/MoldingRejectionView.js"));
 const PourLayouts = lazy(() => import("../views/Pouring/PouringView.js"));
+const PourRejectLayouts = lazy(() => import("../views/Pouring/PouringRejectionView.js"));
+const DispatchLayouts = lazy(() => import("../views/Dispatch/DispatchView.js"));
+const DispatchRejectLayouts = lazy(() => import("../views/Dispatch/DispatchRejectionView.js"));
 
 const LoginLayouts = lazy(() => import("../views/Auth/LoginPage.js"));
 
@@ -60,7 +63,9 @@ const ThemeRoutes = [
       { path: "/molding", exact:true, element: <MoldLayouts /> },
       { path: "/molding-rejection", exact:true, element: <MoldRejectLayouts /> },
       { path: "/pouring", exact:true, element: <PourLayouts /> },
-
+      { path: "/pouring-rejection", exact:true, element: <PourRejectLayouts /> },
+      { path: "/dispatch", exact:true, element: <DispatchLayouts /> },
+      { path: "/dispatch-rejection", exact:true, element: <DispatchRejectLayouts /> },
      
     ],
   },

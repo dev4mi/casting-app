@@ -75,18 +75,20 @@ const MoldingView = () => {
     setErrors({});
     setEditMode(true);
     setSelectedMolding(molding); // Set the selected molding record
+    // console.log(molding.companies[1].products[0].molding_mapping_id+";;;;;;;;");
 
     // Populate the form with the selected molding record
     const newRecords = molding.companies.flatMap(company => 
         company.products.map(product => ({
             id: company.company._id,
+            mapping_id: product.molding_mapping_id,
             company_id: company.company.id,
             product_id: product.id,
             parts: product.parts.map(part => ({
                 part_id: part.id,
                 part_name: part.name,
                 part_qty: part.part_quantity,
-                rejection_qty: 0,
+                rejection_qty: part.rejection_quantity,
 
             })) || []
         }))
@@ -182,15 +184,29 @@ const MoldingView = () => {
     setRecords(updatedRecords);
   };
 
-  const handleRemoveRecord = async (record) => {
+  const handleRemoveRecord = async (record, mapping_id) => {
     if (editMode) {
       // If in edit mode, delete from the database
       try {
         if(record.company_id != "" && record.product_id != ""){
+          const updatedRecords = records.filter((crecord) => crecord.id !== record.id);
+          setRecords(updatedRecords);
+  
+          // Use map() to ensure proper processing of records after the deletion
+          const uniqueCompanies = new Set();
+          const uniqueProducts = new Set();
+          updatedRecords.map((record) => {
+            if (record.company_id) uniqueCompanies.add(record.company_id);
+            if (record.product_id) uniqueProducts.add(record.product_id);
+          });
+  
+          const total_companies = uniqueCompanies.size;
+          const total_products = uniqueProducts.size;
           // Assuming deleteMoldingMapping is a function that sends the delete request to your backend
-          await deleteMoldingMappingRecord(selectedMolding.molding_unique_number, record.company_id, record.product_id);
+          // await deleteMoldingMappingRecord(selectedMolding.molding_unique_number, record.company_id, record.product_id, total_companies, total_products);
+          await deleteMoldingMappingRecord(mapping_id, total_companies, total_products);
           // After successful deletion, remove the record locally
-          await setRecords(records.filter((crecord) => crecord.id !== record.id));
+          // await setRecords(records.filter((crecord) => crecord.id !== record.id));
           showAlert('Record deleted successfully.', 'success');
         }
         else {
@@ -267,7 +283,15 @@ const MoldingView = () => {
           newErrors[`part_${index}_${partIndex}_part_qty`] = 'Quantity must be greater than 0!';
           isValid = false;
         }
+
+        if(editMode && quantity < part.rejection_qty){
+          newErrors[`part_${index}_${partIndex}_part_qty`] = 'Quantity must be greater than rejection quantity!';
+          isValid = false;
+        }
+
       });
+
+
     });
   
     setErrors(newErrors);
@@ -418,7 +442,7 @@ const MoldingView = () => {
                                   <Fab 
                                     type='button' 
                                     color="error" 
-                                    onClick={() => handleRemoveRecord(record)} 
+                                    onClick={() => handleRemoveRecord(record, record.mapping_id)} 
                                     size="small"  
                                   >
                                     <DeleteIcon />
