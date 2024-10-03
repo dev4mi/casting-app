@@ -335,6 +335,7 @@ const DispatchView = () => {
       backgroundColor: '#f2f2f2',
       textAlign: 'left'
   };
+
   return (
     <div>
        <Grid2 container spacing={{ xs: 2, md: 3 }}>
@@ -492,7 +493,7 @@ const DispatchView = () => {
                     />
                   </FormControl>
                 </div>
-            
+
                 <DataTable value={dispatchDetails} paginator rows={10} header="Dispatch Data" globalFilter={globalFilter} sortMode="multiple">
                     <Column field="_id" header="ID" />
                     <Column field="dispatch_unique_number" header="Dispatch Unique Number" />
@@ -547,6 +548,5 @@ const DispatchView = () => {
       </Grid2>
     </div>
   );
-};
-
+  };
 export default DispatchView;

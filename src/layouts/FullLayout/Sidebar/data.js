@@ -114,6 +114,11 @@ const Menuitems = [
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/dispatch-rejection",
   },
+  {
+    title: "Report",
+    icon: AutoAwesomeMosaicOutlinedIcon,
+    href: "/report",
+  },
   // {
   //   title: "Login",
   //   icon: AutoAwesomeMosaicOutlinedIcon,

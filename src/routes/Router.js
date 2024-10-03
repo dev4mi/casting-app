@@ -34,6 +34,7 @@ const PourLayouts = lazy(() => import("../views/Pouring/PouringView.js"));
 const PourRejectLayouts = lazy(() => import("../views/Pouring/PouringRejectionView.js"));
 const DispatchLayouts = lazy(() => import("../views/Dispatch/DispatchView.js"));
 const DispatchRejectLayouts = lazy(() => import("../views/Dispatch/DispatchRejectionView.js"));
+const ReportLayouts = lazy(() => import("../views/Report/ReportView.js"));
 
 const LoginLayouts = lazy(() => import("../views/Auth/LoginPage.js"));
 
@@ -66,6 +67,7 @@ const ThemeRoutes = [
       { path: "/pouring-rejection", exact:true, element: <PourRejectLayouts /> },
       { path: "/dispatch", exact:true, element: <DispatchLayouts /> },
       { path: "/dispatch-rejection", exact:true, element: <DispatchRejectLayouts /> },
+      { path: "/report", exact:true, element: <ReportLayouts /> },
      
     ],
   },

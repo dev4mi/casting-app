@@ -16,6 +16,7 @@ import CompanyState from "./context/CompanyState";
 import MoldingState from "./context/MoldingState";
 import PouringState from "./context/PouringState";
 import DispatchState from "./context/DispatchState";
+import ReportState from "./context/ReportState";
 
 const App = () => {
   const navigate = useNavigate();
@@ -51,10 +52,12 @@ const AppWrapper = () => (
               <ProductState>
                 <PartState>
                   <ProductPartsState>
+                    <ReportState>
                     <Routes>
                       <Route exact path="/login" element={<LoginPage />} />
                       <Route path="/*" element={<App />} />
                     </Routes>
+                    </ReportState>
                   </ProductPartsState>
                 </PartState>
               </ProductState>
