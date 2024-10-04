@@ -2,7 +2,7 @@ import React from "react";
 import ReportContext from "./ReportContext";
 import { useState } from "react";
 const ReportState = (props) => {
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
     const moldingInitial = [], pouringInitial = [], dispatchInitial = [];
       const [moldingDetails, setMoldingDetails]= useState(moldingInitial);
       const [pouringDetails, setPouringDetails]= useState(pouringInitial);
@@ -69,7 +69,7 @@ const ReportState = (props) => {
       }
     
     return (
-        <ReportContext.Provider value={{ moldingDetails, getAllMoldingData, pouringDetails, getAllPouringData, dispatchDetails, getAllDispatchData}}>
+        <ReportContext.Provider value={{ moldingDetails, setMoldingDetails, getAllMoldingData, pouringDetails, setPouringDetails, getAllPouringData, dispatchDetails, setDispatchDetails, getAllDispatchData}}>
             {props.children}
         </ReportContext.Provider>
     )

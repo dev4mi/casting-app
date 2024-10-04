@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
+import ProtectedRoute from "../views/Auth/ProtectedRoute.js";
 
 /****Layouts*****/
 const FullLayout = lazy(() => import("../layouts/FullLayout/FullLayout.js"));
@@ -22,7 +23,7 @@ const ExSlider = lazy(() => import("../views/FormElements/ExSlider.js"));
 const ExSwitch = lazy(() => import("../views/FormElements/ExSwitch.js"));
 // form layouts
 const FormLayouts = lazy(() => import("../views/FormLayouts/FormLayouts.js"));
-const UserLayouts = lazy(() => import("../views/Users/User.js"));
+const UserLayouts = lazy(() => import("../views/Users/UserView.js"));
 const PermissionLayouts = lazy(() => import("../views/Permissions/PermissionView.js"));
 const RoleLayouts = lazy(() => import("../views/Roles/RoleView.js"));
 const PartsLayouts = lazy(() => import("../views/Parts/PartView.js"));
@@ -55,19 +56,19 @@ const ThemeRoutes = [
       { path: "/form-elements/radio", element: <ExRadio /> },
       { path: "/form-elements/slider", element: <ExSlider /> },
       { path: "/form-elements/switch", element: <ExSwitch /> },
-      { path: "/users", exact:true, element: <UserLayouts /> },
+      { path: "/users", exact:true, element: <ProtectedRoute element={<UserLayouts />} requiredPermissions={['user-listing']} /> },
       { path: "/permissions", exact:true, element: <PermissionLayouts /> },
       { path: "/roles", exact:true, element: <RoleLayouts /> },
-      { path: "/parts", exact:true, element: <PartsLayouts /> },
-      { path: "/productparts", exact:true, element: <ProductPartsLayouts /> },
-      { path: "/companies", exact:true, element: <CompaniesLayouts /> },
-      { path: "/molding", exact:true, element: <MoldLayouts /> },
-      { path: "/molding-rejection", exact:true, element: <MoldRejectLayouts /> },
-      { path: "/pouring", exact:true, element: <PourLayouts /> },
-      { path: "/pouring-rejection", exact:true, element: <PourRejectLayouts /> },
-      { path: "/dispatch", exact:true, element: <DispatchLayouts /> },
-      { path: "/dispatch-rejection", exact:true, element: <DispatchRejectLayouts /> },
-      { path: "/report", exact:true, element: <ReportLayouts /> },
+      { path: "/parts", exact:true, element: <ProtectedRoute element={<PartsLayouts />} requiredPermissions={['part-listing']} /> },
+      { path: "/productparts", exact:true, element: <ProtectedRoute element={<ProductPartsLayouts />} requiredPermissions={['productparts-listing']} /> },
+      { path: "/companies", exact:true, element: <ProtectedRoute element={<CompaniesLayouts />} requiredPermissions={['company-listing']} /> },
+      { path: "/molding", exact:true, element: <ProtectedRoute element={<MoldLayouts />} requiredPermissions={['molding-listing']} /> },
+      { path: "/molding-rejection", exact:true, element: <ProtectedRoute element={<MoldRejectLayouts />} requiredPermissions={['molding-rejection-listing']} /> },
+      { path: "/pouring", exact:true, element: <ProtectedRoute element={<PourLayouts />} requiredPermissions={['pouring-listing']} /> },
+      { path: "/pouring-rejection", exact:true, element: <ProtectedRoute element={<PourRejectLayouts />} requiredPermissions={['pouring-rejection-listing']} /> },
+      { path: "/dispatch", exact:true, element: <ProtectedRoute element={<DispatchLayouts />} requiredPermissions={['dispatch-listing']} /> },
+      { path: "/dispatch-rejection", exact:true, element: <ProtectedRoute element={<DispatchRejectLayouts />} requiredPermissions={['dispatch-rejection-listing']} /> },
+      { path: "/report", exact:true, element: <ProtectedRoute element={<ReportLayouts />} requiredPermissions={['report-generate']} /> },
      
     ],
   },

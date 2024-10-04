@@ -2,7 +2,7 @@ import React from "react";
 import PouringContext from "./PouringContext";
 import { useState } from "react";
 const PouringState = (props) => {
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
     const pouringInitial = [];
       const [pouringDetails, setPouringDetails]= useState(pouringInitial);
       const [pouringWithProductsDetails, setPouringWithProductsDetails]= useState(pouringInitial);

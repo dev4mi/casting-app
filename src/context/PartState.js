@@ -2,7 +2,7 @@ import React from "react";
 import PartContext from "./PartContext";
 import { useState } from "react";
 const PartState = (props) => {
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
     const partsInitial = [];
       const [parts, setParts]= useState(partsInitial);
       const getAllParts = async () =>{

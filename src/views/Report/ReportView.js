@@ -22,12 +22,11 @@ import { Button as PrimeButton } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon, Search } from '@mui/icons-material';
-import DispatchContext from '../../context/DispatchContext';
-import CompanyContext from '../../context/CompanyContext';
+
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'; 
 import { AlertContext } from "../../context/AlertContext";
 import { useNavigate } from 'react-router-dom';
-import ProductContext from '../../context/ProductContext';
+
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -74,7 +73,7 @@ const ReportView = (props) => {
   const [globalFilter, setGlobalFilter] = useState(''); // State to hold the search term
   const [records, setRecords] = useState([]);
   const [value, setValue] = React.useState(0);
-  const { moldingDetails, getAllMoldingData, pouringDetails, getAllPouringData, dispatchDetails, getAllDispatchData } = useContext(ReportContext);
+  const { moldingDetails, setMoldingDetails, getAllMoldingData, pouringDetails, setPouringDetails, getAllPouringData, dispatchDetails, setDispatchDetails, getAllDispatchData } = useContext(ReportContext);
 
   useEffect(() => {
     getAllMoldingData();
@@ -108,6 +107,7 @@ const ReportView = (props) => {
     setErrors(newErrors);
     return isValid;
   };
+
   const [mstartDate, setMStartDate] = useState(null);
   const [mendDate, setMEndDate] = useState(null);
   const [pstartDate, setPStartDate] = useState(null);
@@ -131,31 +131,136 @@ const ReportView = (props) => {
     getAllDispatchData();
   };
 
-  const getFilteredMoldingData = ()=>{
-    let isValid = true;
+  const getFilteredMoldingData = async () => {
     const newErrors = {};
+    
+    // Check if startDate and endDate are provided
     if (mstartDate && mendDate) {
         const startDate = new Date(mstartDate);
         const endDate = new Date(mendDate);
-    
+
+        // Validate the date range
         if (startDate > endDate) {
             newErrors[`mstartdate`] = 'Start date cannot be greater than end date!';
-            isValid = false;
+            showAlert('Start date cannot be greater than end date!', 'error');
             setErrors(newErrors);
-            console.log('sd g ed')
-            return;
+            return null; // Return null to indicate a failure in validation
         }
-        getAllMoldingData(mstartDate, mendDate);
+
+        // Fetch the data using your API logic
+        const fetchedData = await getAllMoldingData(mstartDate, mendDate);
+        setMoldingDetails(fetchedData); // Update state for UI
+        if(fetchedData.length <= 0)
+            showAlert('No Data Found!!','error');
+        return fetchedData; // Return fetched data directly
+    } else {
+        showAlert('Please select start & end date first!', 'error');
     }
+
+    // Set errors if no valid dates were provided
     setErrors(newErrors);
-    // return isValid;
-  }
-  const getFilteredPouringData = ()=>{
-        getAllPouringData(pstartDate, pendDate);
+    return null; // Return null if no valid dates
+};
+
+  const exportData = async (data)=>{
+    if(data=='molding'){
+        const fetchedData = await getFilteredMoldingData();
+
+        // Only call export if data fetching was successful
+        if (fetchedData) {
+            if(fetchedData.length > 0)
+                exportToExcel(fetchedData);  
+            else
+                showAlert('No Data Found!!','error');
+        }       
+    }  
+    else if(data=='pouring'){
+        const fetchedData = await getFilteredPouringData();
+
+        // Only call export if data fetching was successful
+        if (fetchedData) {
+            if(fetchedData.length > 0)
+                exportPouringDataToExcel(fetchedData);  
+            else
+                showAlert('No Data Found!!','error');
+        }       
+    }  
+    else if(data=='dispatch'){
+        const fetchedData = await getFilteredDispatchData();
+
+        // Only call export if data fetching was successful
+        if (fetchedData) {
+            if(fetchedData.length > 0)
+                exportDispatchDataToExcel(fetchedData);  
+            else
+                showAlert('No Data Found!!','error');
+        }       
+    }  
+   }
+
+  const getFilteredPouringData = async ()=>{
+        
+    const newErrors = {};
+    
+    // Check if startDate and endDate are provided
+    if (pstartDate && pendDate) {
+        const startDate = new Date(pstartDate);
+        const endDate = new Date(pendDate);
+
+        // Validate the date range
+        if (startDate > endDate) {
+            newErrors[`pstartdate`] = 'Start date cannot be greater than end date!';
+            showAlert('Start date cannot be greater than end date!', 'error');
+            setErrors(newErrors);
+            return null; // Return null to indicate a failure in validation
+        }
+
+        // Fetch the data using your API logic
+        const fetchedData = await getAllPouringData(pstartDate, pendDate);
+        setPouringDetails(fetchedData); // Update state for UI
+        if(fetchedData.length <= 0)
+            showAlert('No Data Found!!','error');
+        return fetchedData; // Return fetched data directly
+    } else {
+        showAlert('Please select start & end date first!', 'error');
     }
-    const getFilteredDispatchData = ()=>{
-        getAllDispatchData(dstartDate, dendDate);
+
+    // Set errors if no valid dates were provided
+    setErrors(newErrors);
+    return null; // Return null if no valid dates
+        
     }
+    const getFilteredDispatchData = async ()=>{
+        const newErrors = {};
+    
+        // Check if startDate and endDate are provided
+        if (dstartDate && dendDate) {
+            const startDate = new Date(dstartDate);
+            const endDate = new Date(dendDate);
+    
+            // Validate the date range
+            if (startDate > endDate) {
+                newErrors[`dstartdate`] = 'Start date cannot be greater than end date!';
+                showAlert('Start date cannot be greater than end date!', 'error');
+                setErrors(newErrors);
+                return null; // Return null to indicate a failure in validation
+            }
+    
+            // Fetch the data using your API logic
+            const fetchedData = await getAllDispatchData(dstartDate, dendDate);
+            setDispatchDetails(fetchedData); // Update state for UI
+            if(fetchedData.length <= 0)
+                showAlert('No Data Found!!','error');
+            return fetchedData; // Return fetched data directly
+        } else {
+            showAlert('Please select start & end date first!', 'error');
+        }
+    
+        // Set errors if no valid dates were provided
+        setErrors(newErrors);
+        return null; // Return null if no valid dates
+    }
+   
   const handleSubmit = async(event) => {
     event.preventDefault();
 
@@ -171,45 +276,151 @@ const ReportView = (props) => {
       }
   };
  
-  const ExportExcel = ({ data, columns }) => {
-    const exportToExcel = () => {
-      // Create a worksheet and convert the table data to Excel format
-      const worksheet = XLSX.utils.json_to_sheet(
-        data.map(row => ({
-          ID: row._id,
-          'Molding Unique Number': row.molding_unique_number,
-          ...row.companies.reduce((acc, company) => {
-            const productDetails = company.products
-              .map(product => ({
-                Product: product.name,
-                Parts: product.parts
-                  .map(
-                    part =>
-                      `${part.name} (Total: ${part.part_quantity}, Rejected: ${part.rejection_quantity}, Final: ${part.final_quantity})`
-                  )
-                  .join(', '),
-              }))
-              .reduce((pAcc, product) => pAcc + `${product.Product}: ${product.Parts}; `, '');
-  
-            acc[company.company.name] = productDetails;
-            return acc;
-          }, {}),
-        }))
-      );
-  
-      // Create a new workbook and add the worksheet to it
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'MoldingData');
-  
-      // Generate the Excel file and download it
-      XLSX.writeFile(workbook, 'MoldingData.xlsx');
+  const exportToExcel = (moldingDetails) => {
+
+        const worksheetData = [];
+
+        // Prepare header row
+        const header = [
+            'ID',
+            'Molding Unique Number',
+            'Generate Date',
+            'Company',
+            'Product',
+            'Part Name',
+            'Total Quantity',
+            'Rejected Quantity',
+            'Rejected Date',
+            'Final Quantity'
+        ];
+        worksheetData.push(header);
+
+        // Populate the worksheet data
+        moldingDetails.forEach(molding => {
+            const { _id, molding_unique_number, generate_date, companies } = molding;
+
+            companies.forEach(company => {
+                company.products.forEach(product => {
+                    product.parts.forEach(part => {
+                        worksheetData.push([
+                            _id,
+                            molding_unique_number,
+                            dayjs(generate_date).format('DD-MM-YYYY'),
+                            company.company.name,
+                            product.name,
+                            part.name,
+                            part.part_quantity,
+                            part.rejection_quantity,
+                            part.rejection_date ? dayjs(part.rejection_date).format('DD-MM-YYYY') : '-',
+                            part.final_quantity,
+                        ]);
+                    });
+                });
+            });
+        });
+
+        // Create a new workbook and add the worksheet
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Molding Data');
+
+        // Export the workbook to a file
+        XLSX.writeFile(workbook, 'molding_data.xlsx');
     };
-  
-    return (
-      <button onClick={exportToExcel}>Export to Excel</button>
-    );
-  };
-  
+    const exportPouringDataToExcel = (pouringDetails) => {
+        const worksheetData = [];
+
+        // Prepare header row
+        const header = [
+            'ID',
+            'Heat Number',
+            'Generate Date',
+            'Company',
+            'Product Name',
+            'Total Quantity',
+            'Rejected Quantity',
+            'Rejected Date',
+            'Final Quantity'
+        ];
+        worksheetData.push(header);
+
+        // Populate the worksheet data
+        pouringDetails.forEach(pouring => {
+            const { _id, heat_number, generate_date, companies } = pouring;
+
+            companies.forEach(company => {
+                company.products.forEach(product => {
+                    worksheetData.push([
+                        _id,
+                        heat_number,
+                        dayjs(generate_date).format('DD-MM-YYYY'),
+                        company.company.name,
+                        product.name,
+                        product.quantity,
+                        product.rejection_quantity,
+                        product.rejection_date ? dayjs(product.rejection_date).format('DD-MM-YYYY') : '-',
+                        product.final_quantity,
+                    ]);
+                });
+            });
+        });
+
+        // Create a new workbook and add the worksheet
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Pouring Data');
+
+        // Export the workbook to a file
+        XLSX.writeFile(workbook, 'pouring_data.xlsx');
+    };
+
+    const exportDispatchDataToExcel = (dispatchDetails) => {
+        const worksheetData = [];
+    
+        // Prepare header row
+        const header = [
+            'ID',
+            'Dispatch Unique Number',
+            'Generate Date',
+            'Company',
+            'Product Name',
+            'Total Quantity',
+            'Rejected Quantity',
+            'Rejected Date',
+            'Final Quantity'
+        ];
+        worksheetData.push(header);
+    
+        // Populate the worksheet data
+        dispatchDetails.forEach(dispatch => {
+            const { _id, dispatch_unique_number, generate_date, companies } = dispatch;
+    
+            companies.forEach(company => {
+                company.products.forEach(product => {
+                    worksheetData.push([
+                        _id,
+                        dispatch_unique_number,
+                        dayjs(generate_date).format('DD-MM-YYYY'),
+                        company.company.name,
+                        product.name,
+                        product.quantity,
+                        product.rejection_quantity,
+                        product.rejection_date ? dayjs(product.rejection_date).format('DD-MM-YYYY') : '-',
+                        product.final_quantity,
+                    ]);
+                });
+            });
+        });
+    
+        // Create a new workbook and add the worksheet
+        const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Dispatch Data');
+    
+        // Export the workbook to a file
+        XLSX.writeFile(workbook, 'dispatch_data.xlsx');
+    };
+
    const tableStyle = {
       width: '100%',
       borderCollapse: 'collapse'
@@ -298,6 +509,16 @@ const ReportView = (props) => {
                                     >
                                     Cancel
                                     </PrimeButton>
+                                    <PrimeButton
+                                        type="button" 
+                                        variant="contained"
+                                        color="secondary"
+                                        onClick={() => exportData('molding')}
+                                        style={{ marginLeft: '10px', marginTop:'-5px'  }}
+                                    >
+                                    Export to Excel
+                                    </PrimeButton>
+                                   
                                 </Grid2>
                                             
                         </LocalizationProvider>
@@ -324,8 +545,8 @@ const ReportView = (props) => {
                                 </div>
 
                             </div>
-                            <ExportExcel data={moldingDetails} />
-                            <DataTable value={moldingDetails} paginator rows={10} header="Molding Data" globalFilter={globalFilter} sortMode="multiple">
+                            
+                            <DataTable value={moldingDetails}  id="moldingDataTable" paginator rows={10} header="Molding Data" globalFilter={globalFilter} sortMode="multiple">
                             <Column field="_id" header="ID" />
                             <Column field="molding_unique_number" header="Molding Unique Number" />
                             <Column 
@@ -396,6 +617,8 @@ const ReportView = (props) => {
                                     value={pstartDate}
                                     fullWidth
                                     sx={{ width:'100%'}}
+                                    error={Boolean(errors[`pstartdate`])}
+                                    helperText={errors[`pstartdate`]} 
                                     onChange={(newValue) => setPStartDate(newValue)}
                                     renderInput={(params) => <TextField {...params}
                                     />}
@@ -425,6 +648,15 @@ const ReportView = (props) => {
                                     >
                                     Cancel
                                     </PrimeButton>
+                                    <PrimeButton
+                                        type="button" 
+                                        variant="contained"
+                                        color="secondary"
+                                        onClick={() => exportData('pouring')}
+                                        style={{ marginLeft: '10px', marginTop:'-5px'  }}
+                                    >
+                                    Export to Excel
+                                    </PrimeButton>
                                 </Grid2>
                                             
                         </LocalizationProvider>
@@ -451,7 +683,7 @@ const ReportView = (props) => {
                                 </div>
 
                             </div>
-                            <ExportExcel data={pouringDetails} />
+                            
                             <DataTable value={pouringDetails} paginator rows={10} header="Pouring Data" globalFilter={globalFilter} sortMode="multiple">
                                 <Column field="_id" header="ID" />
                                 <Column field="heat_number" header="Heat Number" />
@@ -514,6 +746,8 @@ const ReportView = (props) => {
                                     value={dstartDate}
                                     fullWidth
                                     sx={{ width:'100%'}}
+                                    error={Boolean(errors[`dstartdate`])}
+                                    helperText={errors[`dstartdate`]} 
                                     onChange={(newValue) => setDStartDate(newValue)}
                                     renderInput={(params) => <TextField {...params}
                                     />}
@@ -543,6 +777,15 @@ const ReportView = (props) => {
                                     >
                                     Cancel
                                     </PrimeButton>
+                                    <PrimeButton
+                                        type="button" 
+                                        variant="contained"
+                                        color="secondary"
+                                        onClick={() => exportData('dispatch')}
+                                        style={{ marginLeft: '10px', marginTop:'-5px'  }}
+                                    >
+                                    Export to Excel
+                                    </PrimeButton>
                                 </Grid2>
                                             
                         </LocalizationProvider>
@@ -569,7 +812,7 @@ const ReportView = (props) => {
                                 </div>
 
                             </div>
-                            <ExportExcel data={dispatchDetails} />
+                            
                             <DataTable value={dispatchDetails} paginator rows={10} header="Dispatch Data" globalFilter={globalFilter} sortMode="multiple">
                             <Column field="_id" header="ID" />
                             <Column field="dispatch_unique_number" header="Dispatch Unique Number" />

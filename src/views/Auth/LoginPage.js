@@ -10,7 +10,7 @@ const LoginPage = (props) => {
   const { snackbarOpen, alert, closeAlert } = useContext(AlertContext);
   const { showAlert } = useContext(AlertContext);
   const theme = useTheme();
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({}); // State to store errors

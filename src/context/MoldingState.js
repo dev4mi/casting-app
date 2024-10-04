@@ -2,7 +2,7 @@ import React from "react";
 import MoldingContext from "./MoldingContext";
 import { useState } from "react";
 const MoldingState = (props) => {
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
     const moldingInitial = [];
       const [moldingDetails, setMoldingDetails]= useState(moldingInitial);
       const [moldingWithProductsDetails, setMoldingWithProductsDetails]= useState(moldingInitial);

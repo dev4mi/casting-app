@@ -14,8 +14,10 @@ import { SidebarWidth } from "../../../assets/global/Theme-variable";
 import LogoIcon from "../Logo/LogoIcon";
 import Menuitems from "./data";
 import Buynow from "./Buynow";
+import { useAuth } from "../../../context/AuthContext";
 
 const Sidebar = (props) => {
+  const { user } = useAuth();
   const [open, setOpen] = React.useState(true);
   const { pathname } = useLocation();
   const pathDirect = pathname;
@@ -45,8 +47,10 @@ const Sidebar = (props) => {
         >
           {Menuitems.map((item, index) => {
             //{/********SubHeader**********/}
-
+            // if (user.permissions.includes(item.permission)) {
+              
             return (
+              
               <List component="li" disablePadding key={item.title}>
                 <ListItem
                   onClick={() => handleClick(index)}
@@ -74,6 +78,8 @@ const Sidebar = (props) => {
                 </ListItem>
               </List>
             );
+          // }
+          return null;
           })}
         </List>
       </Box>

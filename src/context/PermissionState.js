@@ -2,7 +2,7 @@ import React from "react";
 import PermissionContext from "./PermissionContext";
 import { useState } from "react";
 const PermissionState = (props) => {
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
     const permissionsInitial = [];
       const [permissions, setPermissions]= useState(permissionsInitial);
       const getAllPermissions = async () =>{

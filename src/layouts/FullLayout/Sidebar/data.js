@@ -58,66 +58,79 @@ const Menuitems = [
     title: "Users",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/users",
+    permission: "user-listing"
   },
   {
     title: "Permissions",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/permissions",
+    permission: "permission-listing"
   },
   {
     title: "Roles",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/roles",
+    permission: "role-listing"
   },
   {
     title: "Parts",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/parts",
+    permission: "part-listing"
   },
   {
     title: "Products",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/productparts",
+    permission: "productparts-listing"
   },
   {
     title: "Companies",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/companies",
+    permission: "company-listing"
   },
   {
     title: "Molding",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/molding",
+    permission: "molding-listing"
   },
   {
     title: "Molding Rejection",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/molding-rejection",
+    permission: "molding-rejection-listing"
   },
   {
     title: "Pouring",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/pouring",
+    permission: "pouring-listing"
   },
   {
     title: "Pouring Rejection",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/pouring-rejection",
+    permission: "pouring-rejection-listing"
   },
   {
     title: "Dispatch",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/dispatch",
+    permission: "dispatch-listing"
   },
   {
     title: "Dispatch Rejection",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/dispatch-rejection",
+    permission: "dispatch-rejection-listing"
   },
   {
     title: "Report",
     icon: AutoAwesomeMosaicOutlinedIcon,
     href: "/report",
+    permission: "report-generate"
   },
   // {
   //   title: "Login",

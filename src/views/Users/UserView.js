@@ -18,7 +18,7 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { AlertContext } from "../../context/AlertContext";
 import { useNavigate } from 'react-router-dom';
 
-const User = (props) => {
+const UserView = (props) => {
   const navigate = useNavigate();
 
   const { showAlert } = useContext(AlertContext);
@@ -57,7 +57,7 @@ const User = (props) => {
     }
     //eslint-disable-next-line
     
-  },[])
+  },[user])
   const handleEdit = (user) => {
     setErrors({});
     setUser({
@@ -514,4 +514,4 @@ const resetForm = () => {
   )
 }
 
-export default User
+export default UserView

@@ -2,7 +2,7 @@ import React from "react";
 import CompanyContext from "./CompanyContext";
 import { useState } from "react";
 const CompanyState = (props) => {
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
     const companiesInitial = [];
       const [companies, setCompanies]= useState(companiesInitial);
       const [companiesWithProducts, setCompaniesWithProducts]= useState(companiesInitial);

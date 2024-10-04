@@ -2,7 +2,7 @@ import React from "react";
 import UserContext from "./UserContext";
 import { useState } from "react";
 const UserState = (props) => {
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
     const usersInitial = [];
       const [users, setUsers]= useState(usersInitial);
       const getAllUsers = async () =>{

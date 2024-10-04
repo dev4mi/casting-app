@@ -2,7 +2,7 @@ import React from "react";
 import DispatchContext from "./DispatchContext";
 import { useState } from "react";
 const DispatchState = (props) => {
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
     const dispatchInitial = [];
       const [dispatchDetails, setDispatchDetails]= useState(dispatchInitial);
       const [dispatchWithProductsDetails, setDispatchWithProductsDetails]= useState(dispatchInitial);

@@ -5,7 +5,7 @@ import { useState } from "react";
 const RoleState = (props) => {
   const [roles, setRoles] = useState([]);
   const [rolesWithPermissions, setRolesWithPermissions] = useState([]);
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
   // Function to fetch roles (example with API call)
   const getAllRoles = async () =>{
       const response = await fetch(`${host}/api/roles/fetchallroles`, {

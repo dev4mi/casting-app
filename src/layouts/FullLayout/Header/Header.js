@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 //import { Link } from 'react-router-dom';
 
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
@@ -7,6 +7,8 @@ import AddToPhotosOutlinedIcon from '@mui/icons-material/AddToPhotosOutlined';
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+
+
 
 import {
   AppBar,
@@ -22,10 +24,22 @@ import {
 } from "@mui/material";
 
 import userimg from "../../../assets/images/users/user.jpg";
+import { useAuth } from "../../../context/AuthContext";
 
 const Header = (props) => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const { user } = useAuth();
+  const [profilePic, setProfilePic] = useState(null);
 
+  useEffect(()=>{
+    if (user && user.profile_pic) {
+      setProfilePic(`http://localhost:5000/uploads/${user.profile_pic}`);
+    } else {
+      setProfilePic(userimg); // fallback to default image
+    }
+    //eslint-disable-next-line
+    
+  },[user])
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -213,7 +227,7 @@ const Header = (props) => {
             }}
           >
             <Avatar
-              src={userimg}
+              src={profilePic || userimg}
               alt={userimg}
               sx={{
                 width: "30px",

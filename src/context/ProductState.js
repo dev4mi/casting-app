@@ -2,7 +2,7 @@ import React from "react";
 import ProductContext from "./ProductContext";
 import { useState } from "react";
 const ProductState = (props) => {
-  const host = "http://localhost:5000";
+  const host = process.env.REACT_APP_HOST_URL;
     const productsInitial = [];
       const [products, setProducts]= useState(productsInitial);
       const getAllProducts = async () =>{

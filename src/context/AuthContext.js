@@ -18,6 +18,8 @@ export const AuthProvider = (props) => {
         setUser(userData);
         setToken(token);
         localStorage.setItem('token', token);
+        localStorage.setItem('profile_pic', userData.profile_pic);
+        localStorage.setItem('permissions', JSON.stringify(userData.permissions));
     };
 
     const logout = () => {

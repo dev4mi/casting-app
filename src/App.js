@@ -23,14 +23,17 @@ const App = () => {
   const routing = useRoutes(Themeroutes);
   const theme = baseTheme;
   
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   useEffect(() => {
+    
     if (!token) {
-      console.log('token'+token)
+      console.log('user'+user)
       navigate("/login");
-    }
-  }, [token, navigate]);
+    }else
+    console.log('user'+user)
+
+  }, [user, token, navigate]);
 
   return (
     <ThemeProvider theme={theme}>
