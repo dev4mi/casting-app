@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import RoleContext from "./RoleContext";
 import { useState } from "react";
+import { useAuth } from "./AuthContext"; 
 
 const RoleState = (props) => {
   const [roles, setRoles] = useState([]);
   const [rolesWithPermissions, setRolesWithPermissions] = useState([]);
+  // const { getVarWithExpiry } = useAuth();
   const host = process.env.REACT_APP_HOST_URL;
   // Function to fetch roles (example with API call)
   const getAllRoles = async () =>{

@@ -61,6 +61,8 @@ const Header = (props) => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('profile_pic');
+    localStorage.removeItem('permissions');
     setAnchorEl4(null);
     window.location.reload();
   };

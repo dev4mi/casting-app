@@ -71,7 +71,7 @@ const LoginPage = (props) => {
             // Handle error, show alert
           } else {
             login( json.user , json.authtoken);
-            localStorage.setItem("token", json.authtoken);
+            // localStorage.setItem("token", json.authtoken);
             showAlert('Logged in successfully.','success');
             navigate("/users");
           }
