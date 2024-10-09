@@ -426,7 +426,7 @@ const resetForm = () => {
                 </TextField>
               </Grid2>
               <Grid2 size={{ xs: 6, md: 4 }}>
-                {/* File input for profile picture */}
+                {/* File input for profile picture */} 
                 <TextField
                     id="profile_pic"
                     name="profile_pic"

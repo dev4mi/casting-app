@@ -14,7 +14,7 @@ const Footer = () => {
                     <Typography>Sand Casting © {new Date().getFullYear()}</Typography>
                 </Box>
                 <Box sx={{ textAlign: 'right' }}>
-                    <Typography>Developed with  <FavoriteIcon sx={{ color: 'red', mx: 0.5 }} /> By 4m!</Typography>
+                    <Typography>Developed with  <FavoriteIcon sx={{ color: 'red', mx: 0.5 }} /> By Zeus Technocrats</Typography>
                 </Box>
             </Box>
         </>

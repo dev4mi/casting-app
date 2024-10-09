@@ -31,8 +31,8 @@ const Header = (props) => {
   const [profilePic, setProfilePic] = useState(null);
 
   useEffect(()=>{
-    if (user && user.profile_pic) {
-      setProfilePic(`http://localhost:5000/uploads/${user.profile_pic}`);
+    if (localStorage.getItem('profile_pic')) {
+      setProfilePic(`http://localhost:5000/uploads/${localStorage.getItem('profile_pic')}`);
     } else {
       setProfilePic(userimg); // fallback to default image
     }

@@ -22,7 +22,7 @@ const Sidebar = (props) => {
   const { pathname } = useLocation();
   const pathDirect = pathname;
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
-
+ 
   const handleClick = (index) => {
     if (open === index) {
       setOpen((prevopen) => !prevopen);
@@ -47,7 +47,7 @@ const Sidebar = (props) => {
         >
           {Menuitems.map((item, index) => {
             //{/********SubHeader**********/}
-            // if (user.permissions.includes(item.permission)) {
+            if (localStorage.getItem("permissions").includes(item.permission)) {
               
             return (
               
@@ -78,7 +78,7 @@ const Sidebar = (props) => {
                 </ListItem>
               </List>
             );
-          // }
+          }
           return null;
           })}
         </List>
